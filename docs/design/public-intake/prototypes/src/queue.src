@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Public queue · ExoFab public intake</title>
+<meta name="description" content="Every idea sent to ExoFab and where it stands: submitted, accepted, building in Synbios, or shipped.">
+<meta name="theme-color" content="#08090a">
+<link rel="icon" href="../assets/mark.svg" type="image/svg+xml">
+<link rel="stylesheet" href="tokens.css">
+<style>
+.page{padding-top:var(--sp-6)}
+.qh{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:var(--sp-4)}
+h1{font-weight:500;font-size:clamp(30px,6vw,42px);letter-spacing:-.03em;line-height:1.08;margin:10px 0 6px}
+.intro{color:var(--tx2);margin:0;max-width:56ch}
+.filters{display:flex;gap:6px;flex-wrap:wrap;margin:var(--sp-5) 0 var(--sp-4);padding:0;list-style:none}
+.filters button{min-height:44px;padding:0 14px;border-radius:999px;border:1px solid var(--line-2);background:transparent;color:var(--tx2);font:14px var(--sans);cursor:pointer}
+.filters button[aria-pressed=true]{background:var(--s2);color:var(--tx);border-color:var(--tx3)}
+.filters .n{font-family:var(--mono);font-size:12px;color:var(--tx3);margin-left:6px}
+.list{list-style:none;padding:0;margin:0;display:grid;gap:var(--sp-3)}
+@media(min-width:900px){.list{grid-template-columns:1fr 1fr}}
+.card{display:grid;grid-template-columns:1fr auto;gap:var(--sp-3);padding:var(--sp-4) var(--sp-5)}
+.card:target{border-color:var(--ice)}
+.card .meta{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center}
+.card .id{font-family:var(--mono);font-size:12.5px;color:var(--tx3)}
+.card h2{font-size:19px;font-weight:500;margin:8px 0 4px;letter-spacing:-.01em}
+.card p{margin:0;color:var(--tx2)}
+.card .foot2{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:10px;font-size:14px;color:var(--tx3);align-items:center}
+.card .foot2 a{min-height:44px;display:inline-flex;align-items:center}
+.glyph{width:56px;height:56px}
+.empty{padding:var(--sp-6) var(--sp-5);text-align:center;color:var(--tx2)}
+.status-line{color:var(--tx3);font-size:14px;margin:0 0 var(--sp-3)}
+</style>
+</head>
+<body>
+{{HEAD}}
+<main id="main">
+<div class="wrap page">
+  <div class="qh">
+    <div><span class="mono">Public queue</span><h1>What we're building next</h1>
+    <p class="intro">Every idea that was shared publicly, newest first. Statuses move from submitted to accepted, building in Synbios, and shipped.</p></div>
+    <a class="btn ice" href="submit.html">Submit an idea</a>
+  </div>
+  <div class="filters" role="group" aria-label="Filter by status" id="filters"></div>
+  <p class="status-line" id="count" role="status" aria-live="polite"></p>
+  <ul class="list" id="list"></ul>
+  <p class="ex" style="margin-top:var(--sp-5)">Example data · prototype reads data/ideas.json (inlined below for file:// use)</p>
+</div>
+</main>
+{{FOOT}}
+<script type="application/json" id="seed">{{DATA}}</script>
+<script>
+(()=>{const $=id=>document.getElementById(id);
+// STUB: production reads GET /api/ideas; until wired, data/ideas.json. Prototype inlines it to avoid any network call.
+const ideas=JSON.parse($('seed').textContent).ideas.sort((a,b)=>b.opened.localeCompare(a.opened));
+const F=[['all','All'],['submitted','Submitted'],['accepted','Accepted'],['building','Building'],['shipped','Shipped']];
+const label={submitted:'Submitted',accepted:'Accepted',building:'Building',shipped:'Shipped'};
+const stageName=['Idea','Shape','Prototype','Build','Ship'];
+const fmt=d=>new Date(d+'T12:00:00').toLocaleDateString('en',{month:'short',day:'numeric',year:'numeric'});
+function glyph(s){// mini lattice: 5 concentric hex rings, current ring highlighted
+ const hex=r=>[0,1,2,3,4,5].map(i=>{const a=Math.PI/3*i-Math.PI/2;return (r*Math.cos(a)).toFixed(1)+','+(r*Math.sin(a)).toFixed(1)}).join(' ');
+ let o='';for(let k=1;k<=4;k++)o+=`<polygon points="${hex(k*6)}" fill="none" stroke="${k===s?'#e9f4ff':k<s?'#4a5560':'#22262b'}" stroke-width="${k===s?1.6:1}" ${k>s?'stroke-dasharray="2 3"':''}/>`;
+ o+=`<circle r="3" fill="${s===0?'#e9f4ff':'#f2ab6d'}"/>`;
+ return `<svg class="glyph" viewBox="-28 -28 56 56" role="img" aria-label="Stage ${s+1} of 5: ${stageName[s]}">${o}</svg>`}
+let cur='all';if(new URLSearchParams(location.search).get('empty')==='1')ideas.length=0;
+function render(){const L=cur==='all'?ideas:ideas.filter(i=>i.status===cur);
+ $('filters').innerHTML=F.map(([k,t])=>`<button type="button" data-k="${k}" aria-pressed="${k===cur}">${t}<span class="n">${k==='all'?ideas.length:ideas.filter(i=>i.status===k).length}</span></button>`).join('');
+ $('count').textContent=`Showing ${L.length} ${L.length===1?'idea':'ideas'}${cur==='all'?'':' · '+label[cur]}.`;
+ $('list').innerHTML=L.length?L.map(i=>`<li class="panel card" id="${i.id}"><div><div class="meta"><span class="id">${i.id}</span><span class="st ${i.status}">${label[i.status]}</span></div>
+ <h2>${i.title}</h2><p>${i.blurb}</p><div class="foot2"><span>Opened ${fmt(i.opened)}</span>${i.submitter?`<span>by ${i.submitter}</span>`:''}${i.synbios_url&&i.status!=='submitted'&&i.status!=='accepted'?`<a href="${i.synbios_url}">${i.status==='shipped'?'See how it was built':'Building in Synbios'}<span class="sr"> for ${i.title}</span> →</a>`:''}</div></div>${glyph(i.stage)}</li>`).join('')
+ :`<li class="panel empty">No ideas here yet. <a href="submit.html">Submit the first one</a>.</li>`;
+ $('filters').querySelectorAll('button').forEach(b=>b.onclick=()=>{cur=b.dataset.k;render();$('filters').querySelector(`[data-k="${cur}"]`).focus()});}
+const h=new URLSearchParams(location.search).get('status');if(h&&label[h])cur=h;
+render();
+})();
+</script>
+</body>
+</html>

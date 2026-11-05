@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Submit an idea · ExoFab public intake</title>
+<meta name="description" content="Send ExoFab an idea to build. No account needed. Your email is only used for updates and is never shown publicly.">
+<meta name="theme-color" content="#08090a">
+<link rel="icon" href="../assets/mark.svg" type="image/svg+xml">
+<link rel="stylesheet" href="tokens.css">
+<style>
+.page{max-width:640px;padding-top:var(--sp-6)}
+h1{font-weight:500;font-size:clamp(30px,6vw,42px);letter-spacing:-.03em;line-height:1.08;margin:10px 0 8px}
+.intro{color:var(--tx2);margin:0 0 var(--sp-5)}
+form{padding:var(--sp-5)}
+.f{margin-bottom:var(--sp-5)}
+label,.lbl{display:block;font-weight:500;margin-bottom:6px}
+.opt{color:var(--tx3);font-weight:400;font-size:14px}
+.hint{display:block;color:var(--tx3);font-size:14px;margin-top:6px}
+input[type=text],input[type=email],textarea{width:100%;font:16px/1.5 var(--sans);color:var(--tx);background:var(--s0);border:1px solid var(--line-2);border-radius:var(--r-m);padding:12px 14px;min-height:48px}
+textarea{min-height:140px;resize:vertical}
+input:hover,textarea:hover{border-color:#3d444d}
+input:focus-visible,textarea:focus-visible{outline:2px solid var(--focus);outline-offset:1px;border-color:transparent}
+input[aria-invalid=true],textarea[aria-invalid=true]{border-color:var(--err)}
+.err{color:var(--err);font-size:14px;margin-top:6px;display:none}
+.err.on{display:block}
+.chk{display:flex;gap:12px;align-items:flex-start;min-height:44px;cursor:pointer}
+.chk input{width:22px;height:22px;margin:2px 0 0;accent-color:var(--ice);flex:none}
+.chk .lbl{margin:0}
+.req{color:var(--tx3);font-size:14px;margin:0 0 var(--sp-4)}
+.actions{display:flex;flex-wrap:wrap;gap:var(--sp-4);align-items:center}
+.sum{border:1px solid var(--err);border-radius:var(--r-m);padding:var(--sp-3) var(--sp-4);margin-bottom:var(--sp-4);color:var(--tx)}
+.sum ul{margin:6px 0 0;padding-left:20px}.sum a{color:var(--err)}
+.done{padding:var(--sp-6) var(--sp-5)}
+.done h2{font-weight:500;font-size:26px;letter-spacing:-.02em;margin:12px 0 8px}
+.done p{color:var(--tx2);margin:0 0 var(--sp-4)}
+.qid{font-family:var(--mono);font-size:15px;color:var(--ice);border:1px solid #e9f4ff55;border-radius:var(--r-s);padding:2px 8px}
+.gem{display:block}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top"><div class="wrap">
+  <a class="brand" href="index.html" aria-label="ExoFab public intake, home"><img src="../assets/mark.svg" width="22" height="22" alt="">EXOFAB</a>
+  <span class="chip">public intake</span>
+  <nav class="nav" aria-label="Primary"><a href="submit.html" aria-current="page">Submit</a><a href="queue.html">Queue</a></nav>
+</div></header>
+
+<main id="main">
+<div class="wrap page">
+  <div id="formView">
+    <span class="mono">Step 1 of the queue</span>
+    <h1>Submit an idea</h1>
+    <p class="intro">Tell us what you'd like built. No account needed. We read every idea, and the ones we take on are built in public.</p>
+    <form class="panel" id="f" novalidate>
+      <div class="sum" id="sum" role="alert" tabindex="-1" hidden><b>Please fix 1 thing before sending:</b><ul id="sumList"></ul></div>
+      <p class="req">Fields marked <span aria-hidden="true">*</span><span class="sr">with an asterisk</span> are required.</p>
+      <div class="f"><label for="title">Title <span aria-hidden="true">*</span></label>
+        <input type="text" id="title" name="title" required maxlength="80" autocomplete="off" aria-describedby="title-h title-e">
+        <span class="hint" id="title-h">A short name. Example: "Tide board for the harbour".</span>
+        <span class="err" id="title-e">Add a short title so we can list your idea.</span></div>
+      <div class="f"><label for="what">What should it do? <span aria-hidden="true">*</span></label>
+        <textarea id="what" name="what" required maxlength="2000" aria-describedby="what-h what-e"></textarea>
+        <span class="hint" id="what-h">A few sentences is plenty. What problem does it solve?</span>
+        <span class="err" id="what-e">Tell us a little about what it should do.</span></div>
+      <div class="f"><label for="who">Who is it for? <span class="opt">(optional)</span></label>
+        <input type="text" id="who" name="who" maxlength="120" autocomplete="off"></div>
+      <div class="f"><label for="name">Your name <span class="opt">(optional)</span></label>
+        <input type="text" id="name" name="name" maxlength="80" autocomplete="name" aria-describedby="name-h">
+        <span class="hint" id="name-h">Shown on the queue if you list publicly. Leave blank to stay anonymous.</span></div>
+      <div class="f"><label for="email">Contact email <span class="opt">(optional)</span></label>
+        <input type="email" id="email" name="email" maxlength="200" autocomplete="email" inputmode="email" aria-describedby="email-h email-e">
+        <span class="hint" id="email-h">For updates on this idea only. Never shown on the public queue.</span>
+        <span class="err" id="email-e">That email doesn't look complete. Check it, or leave it blank.</span></div>
+      <div class="f"><label class="chk" for="pub"><input type="checkbox" id="pub" name="public" checked aria-describedby="pub-h"><span><span class="lbl">May we list this idea publicly?</span>
+        <span class="hint" id="pub-h" style="margin-top:2px">If unchecked, only the ExoFab team sees it.</span></span></label></div>
+      <div class="actions"><button class="btn ice" type="submit">Submit idea</button><a class="tlink" href="queue.html">See the public queue</a></div>
+    </form>
+  </div>
+  <section class="panel done" id="doneView" hidden aria-labelledby="done-h" tabindex="-1">
+    <svg class="gem" width="40" height="40" viewBox="0 0 22 22" aria-hidden="true"><polygon points="11,1 20,6 20,16 11,21 2,16 2,6" fill="none" stroke="#8fe0b0" stroke-width="1.2"/><circle cx="11" cy="11" r="3" fill="#f2ab6d"/></svg>
+    <h2 id="done-h">Thank you. Your idea is in.</h2>
+    <p>Your queue id is <span class="qid" id="qid">idea-0042</span>. <span id="pubmsg">It now shows on the public queue as <span class="st submitted">Submitted</span>.</span></p>
+    <p>We review new ideas each week. If you left an email, we'll write when its status changes. Nothing else.</p>
+    <div class="actions"><a class="btn ice" id="qlink" href="queue.html#idea-0042">View it in the queue</a><a class="tlink" href="submit.html">Submit another idea</a></div>
+    <p class="ex" style="margin-top:var(--sp-5)">Prototype · nothing was sent</p>
+  </section>
+  <p class="sr" id="live" role="status" aria-live="polite"></p>
+</div>
+</main>
+<footer class="foot"><div class="wrap">
+  <p>Moissanite Labs · <a href="https://github.com/Moissanite-Labs/exofab">ExoFab</a></p>
+  <p>We build in the open, with the people we build for.</p>
+</div></footer>
+
+<script>
+(()=>{const $=id=>document.getElementById(id),f=$('f');
+function done(id,pub){$('formView').hidden=true;const d=$('doneView');d.hidden=false;$('qid').textContent=id;$('qlink').href='queue.html#'+id;
+ if(!pub)$('pubmsg').textContent='It is private, so only the ExoFab team will see it.';
+ $('live').textContent='Idea submitted. Your queue id is '+id+'.';d.focus();}
+if(new URLSearchParams(location.search).get('done')==='1'){done('idea-0042',true);return}
+const rules=[['title',v=>v.trim().length>0],['what',v=>v.trim().length>0],['email',v=>!v||/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim())]];
+f.addEventListener('submit',e=>{e.preventDefault();const bad=[];
+ rules.forEach(([id,ok])=>{const i=$(id),good=ok(i.value);i.setAttribute('aria-invalid',!good);$(id+'-e').classList.toggle('on',!good);if(!good)bad.push(id)});
+ const s=$('sum');if(bad.length){$('sumList').innerHTML=bad.map(id=>`<li><a href="#${id}">${$(id+'-e').textContent}</a></li>`).join('');
+  s.querySelector('b').textContent=`Please fix ${bad.length} thing${bad.length>1?'s':''} before sending:`;s.hidden=false;s.focus();return}
+ s.hidden=true;
+ // STUB: POST /api/ideas — prototype makes no network call. Id is simulated.
+ done('idea-0042',$('pub').checked);});
+})();
+</script>
+</body>
+</html>
