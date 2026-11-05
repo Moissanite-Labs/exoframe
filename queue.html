@@ -83,7 +83,7 @@ function outbound(i){
  if(!active)return '';
  let h='';
  if(realSynbios(i.synbios_url))h+=`<a href="${i.synbios_url}">${i.status==='shipped'?'See how it was built':'Building in Synbios'}<span class="sr"> for ${i.title}</span> →</a>`;
- else if(active)h+=`<span class="synbios-txt">${i.status==='shipped'?'Shipped (Synbios not linked yet)':'Building in Synbios (not linked yet)'}</span>`;
+ else if(active)h+=`<span class="synbios-txt">${i.status==='shipped'?'Example · Shipped (Synbios not linked yet)':'Example · Building in Synbios (not linked yet)'}</span>`;
  if(slug)h+=`<a href="projects/${slug}/">Open project<span class="sr"> for ${i.title}</span> →</a>`;
  return h;}
 function render(){const L=cur==='all'?ideas:ideas.filter(i=>i.status===cur);

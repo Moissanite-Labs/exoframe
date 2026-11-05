@@ -4,12 +4,14 @@
 from __future__ import annotations
 
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 ALLOWLIST = frozenset({"harbor-light"})
+PROJECT_REF_RE = re.compile(r"^project/[a-z0-9][a-z0-9-]{0,62}$")
 JSON_FILES = ("manifest.json", "activity.json")
 
 
@@ -18,9 +20,11 @@ def branch_for_slug(slug: str) -> str:
         raise SystemExit(f"slug not allowlisted: {slug}")
     override = __import__("os").environ.get("EXOFRAME_PROJECT_GIT_REF")
     if override:
-        if ".." in override or override.startswith("/"):
-            raise SystemExit("invalid EXOFRAME_PROJECT_GIT_REF")
-        return override
+        if not PROJECT_REF_RE.match(override):
+            raise SystemExit("EXOFRAME_PROJECT_GIT_REF must match project/<slug>")
+        if override != f"project/{slug}":
+            raise SystemExit("EXOFRAME_PROJECT_GIT_REF must match requested slug")
+        return f"origin/{override}"
     ref = f"origin/project/{slug}"
     return ref
 

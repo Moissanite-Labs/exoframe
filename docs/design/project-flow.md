@@ -15,7 +15,7 @@ There is **no automatic** “push to `project/harbor-light` → Pages updates”
 
 1. **No separate working repo yet** — dedicated working-repo provisioning not done; `work/harbor-light` is a **stand-in** only.
 2. **No delivered / built artifact yet** — public page shows **status + activity only**.
-3. **Synbios not wired** — queue/project may say “Building in Synbios” as **text**; no real Synbios URL until `https://…` exists in data.
+3. **Synbios not wired** — example queue cards use **Example · Building in Synbios (not linked yet)** (simulation copy, not live Synbios work); no real URL until `https://…` exists in data.
 4. **Example · simulation** labeling on the Harbor Light page.
 
 ## Source model
@@ -30,7 +30,7 @@ There is **no automatic** “push to `project/harbor-light` → Pages updates”
 
 | | **Local / PR checkout** | **GitHub Actions (trusted `main`)** |
 |--|-------------------------|-------------------------------------|
-| Scripts | `scripts/aggregate_projects.py` from your checkout | Same files checked out at **default-branch SHA once** per run (`contents: read`) |
+| Scripts | `scripts/aggregate_projects.py` from your checkout | Re-checkout **`scripts/`** at recorded default-branch SHA before import/aggregate (`contents: read`) |
 | Input JSON | `project-sources/` in working tree (`EXOFRAME_PROJECT_SOURCES` optional) | `project-sources/` on `main`, **or** import via `import_project_branch.py` after `git fetch origin project/<slug>` |
 | Import branch | `python3 scripts/import_project_branch.py harbor-light` (after fetch) | Manual **workflow_dispatch** on **`main` only** with “Import from project branch” |
 | Output | `projects/`, `data/projects.json` | Commit job writes only those paths + updated `project-sources/` when imported (`contents: write`) |
@@ -73,11 +73,13 @@ python3 scripts/test_aggregate_regression.py   # CI harness
 
 ## Security
 
-- JSON parse only from project branches; **never** run scripts/workflows from `project/**` with write credentials.
-- Workflow file + aggregator pinned to **default branch SHA** each run.
-- `workflow_dispatch` runs only when `github.ref` is the default branch.
+- JSON parse only from project branches; **never** run scripts from `project/**` with write credentials in the commit job.
+- **`workflow_dispatch` only on the default branch** (`github.ref` guard). GitHub always runs the **workflow definition** from the branch that owns the workflow file (typically `main`); this repo does **not** claim to “pin” that YAML at runtime—only **`scripts/`** are re-checked out from the resolved default-branch SHA before import/aggregate.
 - Writes restricted to `project-sources/<slug>/`, `projects/<slug>/`, `data/projects.json`.
-- Loop prevention: workflow path filter `project-sources/**`; `[aggregate]` commits do not match. **No HEAD~1 skip** (source commits after bot commits still aggregate).
+- **Aggregate loop prevention (accurate):**
+  - Pushes that change `project-sources/**` match the workflow path filter (including bot commits that refresh the snapshot).
+  - The job **`if`** skips runs when the triggering commit message contains **`[aggregate]`** (bot commits). That message check is the guard that stops an import/aggregate bot push from immediately re-running aggregation.
+  - Human (or non-bot) commits that change `project-sources/**` without `[aggregate]` in the message still run aggregation—even right after a bot commit.
 
 ## Related docs
 

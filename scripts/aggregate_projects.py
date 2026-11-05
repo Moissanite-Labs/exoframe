@@ -262,7 +262,7 @@ def render_project_page(manifest: dict, activity: list) -> str:
         banner = '<p class="notice ex-banner" role="status">Example project · simulation</p>'
         gap_note = (
             '<p class="gap-note">Status and activity only. No separate working repo yet; '
-            "no delivered artifact; Synbios is not linked on the public site yet. "
+            "no delivered artifact; Synbios is not linked on the public site yet (example simulation copy only). "
             "Linked <code>work/harbor-light</code> branch is a stand-in, "
             "not proof of a built result.</p>"
         )
