@@ -27,6 +27,9 @@ ALLOWED_URL_PATH_PREFIXES = (
     "/Moissanite-Labs/exofab/",
 )
 
+SYNBIOS_STUBS = frozenset({"#synbios-placeholder"})
+ACTOR_KINDS = frozenset({"human", "agent"})
+ACTIVITY_LINK_PREFIXES = ("../../", "https://")
 STAGE_NAMES = ("Idea", "Shape", "Prototype", "Build", "Ship")
 STATUS_LABELS = {
     "submitted": "Submitted",
@@ -86,6 +89,24 @@ def validate_working_repo(url: str) -> str:
     return url
 
 
+def validate_public_href(url: str, field: str) -> str:
+    if url in SYNBIOS_STUBS:
+        return url
+    if url.startswith("../../"):
+        if ".." in url[6:] or url.startswith("../../.."):
+            raise SystemExit(f"{field}: invalid relative link")
+        return url
+    return validate_working_repo(url)
+
+
+def validate_optional_url(value: object, field: str) -> str | None:
+    if value is None:
+        return None
+    if not isinstance(value, str):
+        raise SystemExit(f"{field} must be a string or null")
+    return validate_public_href(value.strip(), field)
+
+
 def validate_manifest(manifest: object, slug: str) -> dict:
     if not isinstance(manifest, dict):
         raise SystemExit(f"{slug}: manifest must be an object")
@@ -107,18 +128,34 @@ def validate_manifest(manifest: object, slug: str) -> dict:
         raise SystemExit(f"{slug}: invalid blurb")
     manifest = dict(manifest)
     manifest["working_repo"] = validate_working_repo(str(manifest["working_repo"]))
+    manifest["synbios_url"] = validate_optional_url(manifest.get("synbios_url"), f"{slug}: synbios_url")
+    submitter = manifest.get("submitter")
+    if submitter is not None and (not isinstance(submitter, str) or not submitter.strip()):
+        raise SystemExit(f"{slug}: invalid submitter")
     return manifest
 
 
 def validate_activity(activity: object, slug: str) -> list:
     if not isinstance(activity, list):
         raise SystemExit(f"{slug}: activity must be an array")
+    if len(activity) > 12:
+        raise SystemExit(f"{slug}: activity exceeds 12 rows")
     for i, row in enumerate(activity):
         if not isinstance(row, dict):
             raise SystemExit(f"{slug}: activity[{i}] must be object")
-        for key in ("at", "kind", "summary"):
+        for key in ("at", "actor", "who", "verb"):
             if key not in row or not isinstance(row[key], str) or not row[key].strip():
                 raise SystemExit(f"{slug}: activity[{i}] missing {key}")
+        if row["actor"] not in ACTOR_KINDS:
+            raise SystemExit(f"{slug}: activity[{i}] invalid actor")
+        pending = row.get("pending", False)
+        if pending is not True and pending is not False:
+            raise SystemExit(f"{slug}: activity[{i}] pending must be boolean")
+        link = row.get("link")
+        if link is not None:
+            if not isinstance(link, str):
+                raise SystemExit(f"{slug}: activity[{i}] link must be string")
+            row["link"] = validate_public_href(link.strip(), f"{slug}: activity[{i}] link")
     return activity
 
 
@@ -159,6 +196,47 @@ def fmt_activity_at(iso: str) -> str:
     return dt.strftime("%b %d, %Y · %H:%M UTC")
 
 
+def actor_mark(actor: str) -> str:
+    kind = "Person" if actor == "human" else "Agent"
+    shape = "human" if actor == "human" else "agent"
+    return (
+        f'<span class="act-mark {shape}" aria-hidden="true"></span>'
+        f'<span class="sr">{kind}</span>'
+    )
+
+
+def render_stage_strip(stage: int) -> str:
+    items = []
+    for i, name in enumerate(STAGE_NAMES):
+        current = ' aria-current="step"' if i == stage else ""
+        items.append(f"<li{current}><b>{esc(name)}</b></li>")
+    return "\n".join(items)
+
+
+def render_activity_rows(activity: list) -> str:
+    if not activity:
+        return '<li class="act-empty">No public activity yet.</li>'
+    rows = []
+    for row in activity[:12]:
+        pending = row.get("pending") is True
+        pending_cls = " act-pending" if pending else ""
+        link = row.get("link")
+        link_html = ""
+        if link:
+            link_html = f' <a class="act-link" href="{esc(link)}">Details<span class="sr"> for {esc(row["verb"])}</span> →</a>'
+        pending_note = (
+            '<p class="act-pending-note">Waiting on a human decision</p>' if pending else ""
+        )
+        rows.append(
+            f'<li class="act-item{pending_cls}">'
+            f'<time datetime="{esc(row["at"])}">{esc(fmt_activity_at(row["at"]))}</time>'
+            f'<p class="act-body">{actor_mark(row["actor"])} '
+            f"<span>{esc(row['who'])} · {esc(row['verb'])}</span>"
+            f"{link_html}</p>{pending_note}</li>"
+        )
+    return "\n".join(rows)
+
+
 def render_project_page(manifest: dict, activity: list) -> str:
     slug = manifest["slug"]
     title = manifest["title"]
@@ -166,37 +244,50 @@ def render_project_page(manifest: dict, activity: list) -> str:
     stage = int(manifest["stage"])
     blurb = manifest["blurb"]
     working_repo = manifest["working_repo"]
+    synbios_url = manifest.get("synbios_url")
     idea_id = manifest.get("idea_id", "")
     opened = manifest.get("opened", "")
+    submitter = manifest.get("submitter")
     example = manifest.get("example", False)
 
     status_label = STATUS_LABELS.get(status, status.title())
-    stage_name = STAGE_NAMES[stage]
 
-    activity_items = ""
-    for row in activity:
-        activity_items += (
-            f'<li class="act-item"><time datetime="{esc(row["at"])}">'
-            f"{esc(fmt_activity_at(row['at']))}</time>"
-            f'<span class="act-kind">{esc(row.get("kind", "update"))}</span>'
-            f"<p>{esc(row['summary'])}</p></li>\n"
-        )
-
+    banner = ""
+    gap_note = ""
     if example:
-        banner = (
-            '<p class="notice ex-banner" role="status">'
-            "Example · simulation · status and activity only. "
-            "No separate working repo yet. No delivered artifact yet."
-            "</p>"
+        banner = '<p class="notice ex-banner" role="status">Example project · simulation</p>'
+        gap_note = (
+            '<p class="gap-note">Status and activity only. No separate working repo yet; '
+            "no delivered artifact. Linked <code>work/harbor-light</code> branch is a stand-in, "
+            "not proof of a built result.</p>"
         )
-        work_detail = (
-            "Linked stand-in only (branch work/harbor-light): not a separate "
-            "working repo and not evidence of a built result. Provisioning a dedicated "
-            "repo still needs approval."
+
+    meta_bits = [f"Opened {esc(fmt_date(opened))}"]
+    if idea_id:
+        meta_bits.append(
+            f'<a href="../../queue.html#{esc(idea_id)}">{esc(idea_id)}</a>'
         )
-    else:
-        banner = ""
-        work_detail = "Build work lives on the linked working surface."
+    if submitter:
+        meta_bits.append(f"by {esc(submitter)}")
+    meta_row = " · ".join(meta_bits)
+
+    actions = ""
+    if status in ("building", "shipped"):
+        actions += (
+            f'<a class="btn ice" href="{esc(working_repo)}" rel="noopener noreferrer" '
+            f'target="_blank">Open working repo<span class="sr"> for {esc(title)}</span> →</a>'
+        )
+        if synbios_url and synbios_url != working_repo:
+            syn_label = (
+                "See how it was built" if status == "shipped" else "Building in Synbios"
+            )
+            actions += (
+                f' <a class="tlink" href="{esc(synbios_url)}">{esc(syn_label)}'
+                f'<span class="sr"> for {esc(title)}</span> →</a>'
+            )
+
+    stage_strip = render_stage_strip(stage)
+    activity_html = render_activity_rows(activity)
 
     return f"""<!doctype html>
 <html lang="en">
@@ -209,26 +300,34 @@ def render_project_page(manifest: dict, activity: list) -> str:
 <link rel="icon" href="../../assets/mark.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../../tokens.css">
 <style>
-.page{{padding-top:var(--sp-6);padding-bottom:var(--sp-6)}}
-.ph{{display:flex;flex-wrap:wrap;gap:var(--sp-4);justify-content:space-between;align-items:flex-start}}
-h1{{font-weight:500;font-size:clamp(28px,6vw,40px);letter-spacing:-.03em;line-height:1.1;margin:10px 0 8px}}
-.lede{{color:var(--tx2);margin:0;max-width:60ch}}
-.meta{{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;margin-top:var(--sp-3)}}
-.stage{{font-family:var(--mono);font-size:12px;color:var(--tx3);letter-spacing:.06em}}
-.grid{{display:grid;gap:var(--sp-5);margin-top:var(--sp-5)}}
-@media(min-width:720px){{.grid{{grid-template-columns:1fr 1fr}}}}
-.section{{padding:var(--sp-5)}}
-.section h2{{margin:0 0 var(--sp-4);font-size:17px;font-weight:500}}
-.act{{list-style:none;padding:0;margin:0;display:grid;gap:var(--sp-4)}}
-.act-item{{border-left:2px solid var(--line-2);padding-left:var(--sp-4)}}
-.act-item time{{display:block;font-family:var(--mono);font-size:11px;color:var(--tx3);letter-spacing:.06em}}
-.act-kind{{display:inline-block;margin-top:4px;font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--silicon)}}
-.act-item p{{margin:6px 0 0;color:var(--tx2)}}
-.links{{display:flex;flex-wrap:wrap;gap:var(--sp-3);margin-top:var(--sp-4)}}
-.ex-banner{{margin-bottom:var(--sp-4);max-width:72ch;line-height:1.45}}
-.gap-note{{margin:0;color:var(--tx3);font-size:14px;max-width:60ch}}
-.back{{margin-top:var(--sp-6);font-size:14px;color:var(--tx3)}}
+.page{{padding:var(--sp-6) 0 var(--sp-7)}}
+.hero{{display:grid;gap:var(--sp-3)}}
+h1{{font-weight:500;font-size:clamp(30px,6vw,42px);letter-spacing:-.03em;line-height:1.08;margin:8px 0 0}}
+.lede{{color:var(--tx2);margin:0;max-width:60ch;font-size:17px}}
+.hero-meta{{font-family:var(--mono);font-size:12px;color:var(--tx2);letter-spacing:.04em;margin:0}}
+.hero-meta a{{color:var(--ice)}}
+.actions{{display:flex;flex-wrap:wrap;gap:var(--sp-3) var(--sp-4);align-items:center;margin:var(--sp-5) 0 var(--sp-4)}}
+.ex-banner{{margin-bottom:var(--sp-3)}}
+.gap-note{{margin:0 0 var(--sp-4);color:var(--tx3);font-size:14px;max-width:65ch}}
+.gap-note code{{font-family:var(--mono);font-size:12px}}
+.stages{{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;list-style:none;padding:0;margin:0 0 var(--sp-6)}}
+.stages li{{border:1px solid var(--line);border-radius:var(--r-m);padding:8px 6px;font-size:12px;color:var(--tx2);text-align:center}}
+.stages li b{{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--tx3);font-weight:400}}
+.stages li[aria-current=step]{{border-color:var(--ice);color:var(--tx)}}
+.activity{{list-style:none;padding:0;margin:0;display:grid;gap:var(--sp-4)}}
+.activity .act-item{{padding:var(--sp-4) var(--sp-5);border:1px solid var(--line);border-radius:var(--r-l);background:var(--s1)}}
+.activity time{{display:block;font-family:var(--mono);font-size:11px;color:var(--tx3);letter-spacing:.06em}}
+.act-body{{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0 0;color:var(--tx2);font-size:15px}}
+.act-mark{{display:inline-block;width:10px;height:10px;flex:0 0 auto}}
+.act-mark.human{{border-radius:50%;border:1.5px solid var(--carbon);background:var(--carbon-dim)}}
+.act-mark.agent{{background:var(--silicon);transform:rotate(45deg) scale(.85)}}
+.act-link{{font-size:14px;min-height:44px;display:inline-flex;align-items:center}}
+.act-pending{{border-color:#e9f4ff55}}
+.act-pending-note{{margin:8px 0 0;font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--ice);text-transform:uppercase}}
+.act-empty{{padding:var(--sp-5);color:var(--tx2);text-align:center}}
+.back{{margin-top:var(--sp-5);font-size:14px;color:var(--tx3)}}
 .back a{{min-height:44px;display:inline-flex;align-items:center}}
+@media(max-width:520px){{.stages{{grid-template-columns:repeat(2,1fr)}}}}
 </style>
 </head>
 <body>
@@ -242,36 +341,26 @@ h1{{font-weight:500;font-size:clamp(28px,6vw,40px);letter-spacing:-.03em;line-he
 <main id="main">
 <div class="wrap page">
   {banner}
-  <div class="ph">
-    <div>
-      <span class="mono">ExoFab project</span>
-      <h1 id="title">{esc(title)}</h1>
-      <p class="lede">{esc(blurb)}</p>
-      <div class="meta">
-        <span class="st {esc(status)}">{esc(status_label)}</span>
-        <span class="stage">Stage {stage + 1} of 5 · {esc(stage_name)}</span>
-        {f'<span class="id mono" style="font-size:11px">{esc(idea_id)}</span>' if idea_id else ""}
-      </div>
-    </div>
-  </div>
+  {gap_note}
+  <header class="hero">
+    <span class="st {esc(status)}">{esc(status_label)}</span>
+    <h1 id="title">{esc(title)}</h1>
+    <p class="lede">{esc(blurb)}</p>
+    <p class="hero-meta">{meta_row}</p>
+  </header>
 
-  <div class="grid">
-    <section class="panel section" aria-labelledby="work-h">
-      <h2 id="work-h">Working surface{" (stand-in)" if example else ""}</h2>
-      <p class="gap-note">{esc(work_detail)}</p>
-      <p style="margin:var(--sp-3) 0 0;color:var(--tx2);font-size:15px">This page shows public status and activity only—not a shipped build.</p>
-      <div class="links">
-        <a class="btn sm" href="{esc(working_repo)}">{"View stand-in branch" if example else "Open working surface"}<span class="sr"> for {esc(title)}</span></a>
-      </div>
-      {f'<p style="margin:var(--sp-3) 0 0;color:var(--tx3);font-size:14px">Opened {esc(fmt_date(opened))}</p>' if opened else ""}
-    </section>
+  {f'<div class="actions">{actions}</div>' if actions else ''}
 
-    <section class="panel section" aria-labelledby="act-h">
-      <h2 id="act-h">Recent activity</h2>
-      <ul class="act" id="activity">
-{activity_items}      </ul>
-    </section>
-  </div>
+  <ol class="stages" aria-label="Project stage">
+{stage_strip}
+  </ol>
+
+  <section aria-labelledby="act-h">
+    <h2 id="act-h" class="mono" style="font-size:12px;margin:0 0 var(--sp-4);color:var(--tx3)">Recent activity</h2>
+    <ol class="activity">
+{activity_html}
+    </ol>
+  </section>
 
   <p class="back"><a href="../../queue.html#{esc(idea_id)}">← Back to queue</a> · <a href="../../index.html">Home</a></p>
   <p class="ex" style="margin-top:var(--sp-4)">Generated from project-sources/{esc(slug)}/ · edit activity there, then run aggregation</p>

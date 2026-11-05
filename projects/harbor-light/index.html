@@ -9,26 +9,34 @@
 <link rel="icon" href="../../assets/mark.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../../tokens.css">
 <style>
-.page{padding-top:var(--sp-6);padding-bottom:var(--sp-6)}
-.ph{display:flex;flex-wrap:wrap;gap:var(--sp-4);justify-content:space-between;align-items:flex-start}
-h1{font-weight:500;font-size:clamp(28px,6vw,40px);letter-spacing:-.03em;line-height:1.1;margin:10px 0 8px}
-.lede{color:var(--tx2);margin:0;max-width:60ch}
-.meta{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;margin-top:var(--sp-3)}
-.stage{font-family:var(--mono);font-size:12px;color:var(--tx3);letter-spacing:.06em}
-.grid{display:grid;gap:var(--sp-5);margin-top:var(--sp-5)}
-@media(min-width:720px){.grid{grid-template-columns:1fr 1fr}}
-.section{padding:var(--sp-5)}
-.section h2{margin:0 0 var(--sp-4);font-size:17px;font-weight:500}
-.act{list-style:none;padding:0;margin:0;display:grid;gap:var(--sp-4)}
-.act-item{border-left:2px solid var(--line-2);padding-left:var(--sp-4)}
-.act-item time{display:block;font-family:var(--mono);font-size:11px;color:var(--tx3);letter-spacing:.06em}
-.act-kind{display:inline-block;margin-top:4px;font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--silicon)}
-.act-item p{margin:6px 0 0;color:var(--tx2)}
-.links{display:flex;flex-wrap:wrap;gap:var(--sp-3);margin-top:var(--sp-4)}
-.ex-banner{margin-bottom:var(--sp-4);max-width:72ch;line-height:1.45}
-.gap-note{margin:0;color:var(--tx3);font-size:14px;max-width:60ch}
-.back{margin-top:var(--sp-6);font-size:14px;color:var(--tx3)}
+.page{padding:var(--sp-6) 0 var(--sp-7)}
+.hero{display:grid;gap:var(--sp-3)}
+h1{font-weight:500;font-size:clamp(30px,6vw,42px);letter-spacing:-.03em;line-height:1.08;margin:8px 0 0}
+.lede{color:var(--tx2);margin:0;max-width:60ch;font-size:17px}
+.hero-meta{font-family:var(--mono);font-size:12px;color:var(--tx2);letter-spacing:.04em;margin:0}
+.hero-meta a{color:var(--ice)}
+.actions{display:flex;flex-wrap:wrap;gap:var(--sp-3) var(--sp-4);align-items:center;margin:var(--sp-5) 0 var(--sp-4)}
+.ex-banner{margin-bottom:var(--sp-3)}
+.gap-note{margin:0 0 var(--sp-4);color:var(--tx3);font-size:14px;max-width:65ch}
+.gap-note code{font-family:var(--mono);font-size:12px}
+.stages{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;list-style:none;padding:0;margin:0 0 var(--sp-6)}
+.stages li{border:1px solid var(--line);border-radius:var(--r-m);padding:8px 6px;font-size:12px;color:var(--tx2);text-align:center}
+.stages li b{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--tx3);font-weight:400}
+.stages li[aria-current=step]{border-color:var(--ice);color:var(--tx)}
+.activity{list-style:none;padding:0;margin:0;display:grid;gap:var(--sp-4)}
+.activity .act-item{padding:var(--sp-4) var(--sp-5);border:1px solid var(--line);border-radius:var(--r-l);background:var(--s1)}
+.activity time{display:block;font-family:var(--mono);font-size:11px;color:var(--tx3);letter-spacing:.06em}
+.act-body{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0 0;color:var(--tx2);font-size:15px}
+.act-mark{display:inline-block;width:10px;height:10px;flex:0 0 auto}
+.act-mark.human{border-radius:50%;border:1.5px solid var(--carbon);background:var(--carbon-dim)}
+.act-mark.agent{background:var(--silicon);transform:rotate(45deg) scale(.85)}
+.act-link{font-size:14px;min-height:44px;display:inline-flex;align-items:center}
+.act-pending{border-color:#e9f4ff55}
+.act-pending-note{margin:8px 0 0;font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--ice);text-transform:uppercase}
+.act-empty{padding:var(--sp-5);color:var(--tx2);text-align:center}
+.back{margin-top:var(--sp-5);font-size:14px;color:var(--tx3)}
 .back a{min-height:44px;display:inline-flex;align-items:center}
+@media(max-width:520px){.stages{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
@@ -41,41 +49,35 @@ h1{font-weight:500;font-size:clamp(28px,6vw,40px);letter-spacing:-.03em;line-hei
 
 <main id="main">
 <div class="wrap page">
-  <p class="notice ex-banner" role="status">Example · simulation · status and activity only. No separate working repo yet. No delivered artifact yet.</p>
-  <div class="ph">
-    <div>
-      <span class="mono">ExoFab project</span>
-      <h1 id="title">Harbor Light</h1>
-      <p class="lede">A tiny public tide and ferry board for coastal volunteers, readable in sun and rain.</p>
-      <div class="meta">
-        <span class="st building">Building</span>
-        <span class="stage">Stage 3 of 5 · Prototype</span>
-        <span class="id mono" style="font-size:11px">idea-0042</span>
-      </div>
-    </div>
-  </div>
+  <p class="notice ex-banner" role="status">Example project · simulation</p>
+  <p class="gap-note">Status and activity only. No separate working repo yet; no delivered artifact. Linked <code>work/harbor-light</code> branch is a stand-in, not proof of a built result.</p>
+  <header class="hero">
+    <span class="st building">Building</span>
+    <h1 id="title">Harbor Light</h1>
+    <p class="lede">A tiny public tide and ferry board for coastal volunteers, readable in sun and rain.</p>
+    <p class="hero-meta">Opened Oct 28, 2026 · <a href="../../queue.html#idea-0042">idea-0042</a> · by Rosa</p>
+  </header>
 
-  <div class="grid">
-    <section class="panel section" aria-labelledby="work-h">
-      <h2 id="work-h">Working surface (stand-in)</h2>
-      <p class="gap-note">Linked stand-in only (branch work/harbor-light): not a separate working repo and not evidence of a built result. Provisioning a dedicated repo still needs approval.</p>
-      <p style="margin:var(--sp-3) 0 0;color:var(--tx2);font-size:15px">This page shows public status and activity only—not a shipped build.</p>
-      <div class="links">
-        <a class="btn sm" href="https://github.com/Moissanite-Labs/exoframe/tree/work/harbor-light">View stand-in branch<span class="sr"> for Harbor Light</span></a>
-      </div>
-      <p style="margin:var(--sp-3) 0 0;color:var(--tx3);font-size:14px">Opened Oct 28, 2026</p>
-    </section>
+  <div class="actions"><a class="btn ice" href="https://github.com/Moissanite-Labs/exoframe/tree/work/harbor-light" rel="noopener noreferrer" target="_blank">Open working repo<span class="sr"> for Harbor Light</span> →</a> <a class="tlink" href="#synbios-placeholder">Building in Synbios<span class="sr"> for Harbor Light</span> →</a></div>
 
-    <section class="panel section" aria-labelledby="act-h">
-      <h2 id="act-h">Recent activity</h2>
-      <ul class="act" id="activity">
-<li class="act-item"><time datetime="2026-11-05T18:00:00Z">Nov 05, 2026 · 18:00 UTC</time><span class="act-kind">prototype</span><p>Sun-readable contrast pass on tide glyph · Rosa</p></li>
-<li class="act-item"><time datetime="2026-11-05T14:30:00Z">Nov 05, 2026 · 14:30 UTC</time><span class="act-kind">build</span><p>Prototype ring bonded · Loom</p></li>
-<li class="act-item"><time datetime="2026-10-29T09:00:00Z">Oct 29, 2026 · 09:00 UTC</time><span class="act-kind">shape</span><p>Shape locked with coastal volunteers · Rosa</p></li>
-<li class="act-item"><time datetime="2026-10-28T16:00:00Z">Oct 28, 2026 · 16:00 UTC</time><span class="act-kind">accept</span><p>Accepted from public queue · ExoFab</p></li>
-      </ul>
-    </section>
-  </div>
+  <ol class="stages" aria-label="Project stage">
+<li><b>Idea</b></li>
+<li><b>Shape</b></li>
+<li aria-current="step"><b>Prototype</b></li>
+<li><b>Build</b></li>
+<li><b>Ship</b></li>
+  </ol>
+
+  <section aria-labelledby="act-h">
+    <h2 id="act-h" class="mono" style="font-size:12px;margin:0 0 var(--sp-4);color:var(--tx3)">Recent activity</h2>
+    <ol class="activity">
+<li class="act-item act-pending"><time datetime="2026-11-04T15:00:00Z">Nov 04, 2026 · 15:00 UTC</time><p class="act-body"><span class="act-mark agent" aria-hidden="true"></span><span class="sr">Agent</span> <span>Loom · Publish to testers</span></p><p class="act-pending-note">Waiting on a human decision</p></li>
+<li class="act-item"><time datetime="2026-11-02T11:00:00Z">Nov 02, 2026 · 11:00 UTC</time><p class="act-body"><span class="act-mark agent" aria-hidden="true"></span><span class="sr">Agent</span> <span>Keel · Opened working branch</span> <a class="act-link" href="https://github.com/Moissanite-Labs/exoframe/tree/work/harbor-light">Details<span class="sr"> for Opened working branch</span> →</a></p></li>
+<li class="act-item"><time datetime="2026-10-30T09:00:00Z">Oct 30, 2026 · 09:00 UTC</time><p class="act-body"><span class="act-mark agent" aria-hidden="true"></span><span class="sr">Agent</span> <span>Scout · Shaped brief</span></p></li>
+<li class="act-item"><time datetime="2026-10-29T16:00:00Z">Oct 29, 2026 · 16:00 UTC</time><p class="act-body"><span class="act-mark human" aria-hidden="true"></span><span class="sr">Person</span> <span>ExoFab · Accepted in public queue</span></p></li>
+<li class="act-item"><time datetime="2026-10-28T10:00:00Z">Oct 28, 2026 · 10:00 UTC</time><p class="act-body"><span class="act-mark human" aria-hidden="true"></span><span class="sr">Person</span> <span>Rosa · Submitted idea</span> <a class="act-link" href="../../queue.html#idea-0042">Details<span class="sr"> for Submitted idea</span> →</a></p></li>
+    </ol>
+  </section>
 
   <p class="back"><a href="../../queue.html#idea-0042">← Back to queue</a> · <a href="../../index.html">Home</a></p>
   <p class="ex" style="margin-top:var(--sp-4)">Generated from project-sources/harbor-light/ · edit activity there, then run aggregation</p>

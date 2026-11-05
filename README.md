@@ -11,7 +11,7 @@ GitHub Pages publishes static HTML at the repository root:
 - **Intake:** `index.html`, `submit.html`, `queue.html` (Crystal Lattice UI; see [`docs/design/public-intake/SPEC.md`](docs/design/public-intake/SPEC.md))
 - **Projects:** `projects/<slug>/` generated from `project-sources/<slug>/` (EXAMPLE: [Harbor Light](projects/harbor-light/))
 
-Design sources and screenshots live under [`docs/design/public-intake/`](docs/design/public-intake/). Project-flow architecture: [`docs/design/project-flow.md`](docs/design/project-flow.md).
+Design sources and screenshots live under [`docs/design/public-intake/`](docs/design/public-intake/). Project page IA: [`docs/design/public-intake/PROJECT-PAGE.md`](docs/design/public-intake/PROJECT-PAGE.md). Project-flow architecture: [`docs/design/project-flow.md`](docs/design/project-flow.md).
 
 ### Harbor Light (EXAMPLE)
 
