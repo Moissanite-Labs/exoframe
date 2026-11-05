@@ -1,0 +1,14 @@
+{
+  "example": true,
+  "projects": [
+    {
+      "slug": "harbor-light",
+      "idea_id": "idea-0042",
+      "title": "Harbor Light",
+      "status": "building",
+      "stage": 2,
+      "example": true,
+      "opened": "2026-10-28"
+    }
+  ]
+}

@@ -63,6 +63,8 @@ h1{font-weight:500;font-size:clamp(30px,6vw,42px);letter-spacing:-.03em;line-hei
 (()=>{const $=id=>document.getElementById(id);
 // STUB: production reads GET /api/ideas; until wired, data/ideas.json. Prototype inlines it to avoid any network call.
 const ideas=JSON.parse($('seed').textContent).ideas.sort((a,b)=>b.opened.localeCompare(a.opened));
+let projectByIdea={};
+fetch('data/projects.json').then(r=>r.json()).then(d=>{(d.projects||[]).forEach(p=>{if(p.idea_id)projectByIdea[p.idea_id]=p.slug});render()}).catch(()=>render());
 const F=[['all','All'],['submitted','Submitted'],['accepted','Accepted'],['building','Building'],['shipped','Shipped']];
 const label={submitted:'Submitted',accepted:'Accepted',building:'Building',shipped:'Shipped'};
 const stageName=['Idea','Shape','Prototype','Build','Ship'];
@@ -76,12 +78,12 @@ let cur='all';if(new URLSearchParams(location.search).get('empty')==='1')ideas.l
 function render(){const L=cur==='all'?ideas:ideas.filter(i=>i.status===cur);
  $('filters').innerHTML=F.map(([k,t])=>`<button type="button" data-k="${k}" aria-pressed="${k===cur}">${t}<span class="n">${k==='all'?ideas.length:ideas.filter(i=>i.status===k).length}</span></button>`).join('');
  $('count').textContent=`Showing ${L.length} ${L.length===1?'idea':'ideas'}${cur==='all'?'':' · '+label[cur]}.`;
- $('list').innerHTML=L.length?L.map(i=>`<li class="panel card" id="${i.id}"><div><div class="meta"><span class="id">${i.id}</span><span class="st ${i.status}">${label[i.status]}</span></div>
- <h2>${i.title}</h2><p>${i.blurb}</p><div class="foot2"><span>Opened ${fmt(i.opened)}</span>${i.submitter?`<span>by ${i.submitter}</span>`:''}${i.synbios_url&&i.status!=='submitted'&&i.status!=='accepted'?`<a href="${i.synbios_url}">${i.status==='shipped'?'See how it was built':'Building in Synbios'}<span class="sr"> for ${i.title}</span> →</a>`:''}</div></div>${glyph(i.stage)}</li>`).join('')
+ $('list').innerHTML=L.length?L.map(i=>{const slug=projectByIdea[i.id];const proj=slug?`<a href="projects/${slug}/">ExoFab project page<span class="sr"> for ${i.title}</span> →</a>`:'';return `<li class="panel card" id="${i.id}"><div><div class="meta"><span class="id">${i.id}</span><span class="st ${i.status}">${label[i.status]}</span></div>
+ <h2>${slug?`<a href="projects/${slug}/">${i.title}</a>`:i.title}</h2><p>${i.blurb}</p><div class="foot2"><span>Opened ${fmt(i.opened)}</span>${i.submitter?`<span>by ${i.submitter}</span>`:''}${proj}${!slug&&i.synbios_url&&i.status!=='submitted'&&i.status!=='accepted'?`<a href="${i.synbios_url}">${i.status==='shipped'?'See how it was built':'Building in Synbios'}<span class="sr"> for ${i.title}</span> →</a>`:''}</div></div>${glyph(i.stage)}</li>`}).join('')
  :`<li class="panel empty">No ideas here yet. <a href="submit.html">Submit the first one</a>.</li>`;
  $('filters').querySelectorAll('button').forEach(b=>b.onclick=()=>{cur=b.dataset.k;render();$('filters').querySelector(`[data-k="${cur}"]`).focus()});}
 const h=new URLSearchParams(location.search).get('status');if(h&&label[h])cur=h;
-render();
+// render() invoked after projects.json load (or immediately on fetch failure)
 })();
 </script>
 </body>

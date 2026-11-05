@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Harbor Light · ExoFab project</title>
+<meta name="description" content="A tiny public tide and ferry board for coastal volunteers, readable in sun and rain.">
+<meta name="theme-color" content="#08090a">
+<link rel="icon" href="../../assets/mark.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../tokens.css">
+<style>
+.page{padding-top:var(--sp-6);padding-bottom:var(--sp-6)}
+.ph{display:flex;flex-wrap:wrap;gap:var(--sp-4);justify-content:space-between;align-items:flex-start}
+h1{font-weight:500;font-size:clamp(28px,6vw,40px);letter-spacing:-.03em;line-height:1.1;margin:10px 0 8px}
+.lede{color:var(--tx2);margin:0;max-width:60ch}
+.meta{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;margin-top:var(--sp-3)}
+.stage{font-family:var(--mono);font-size:12px;color:var(--tx3);letter-spacing:.06em}
+.grid{display:grid;gap:var(--sp-5);margin-top:var(--sp-5)}
+@media(min-width:720px){.grid{grid-template-columns:1fr 1fr}}
+.section{padding:var(--sp-5)}
+.section h2{margin:0 0 var(--sp-4);font-size:17px;font-weight:500}
+.act{list-style:none;padding:0;margin:0;display:grid;gap:var(--sp-4)}
+.act-item{border-left:2px solid var(--line-2);padding-left:var(--sp-4)}
+.act-item time{display:block;font-family:var(--mono);font-size:11px;color:var(--tx3);letter-spacing:.06em}
+.act-kind{display:inline-block;margin-top:4px;font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--silicon)}
+.act-item p{margin:6px 0 0;color:var(--tx2)}
+.links{display:flex;flex-wrap:wrap;gap:var(--sp-3);margin-top:var(--sp-4)}
+.ex-banner{margin-bottom:var(--sp-4);max-width:72ch;line-height:1.45}
+.gap-note{margin:0;color:var(--tx3);font-size:14px;max-width:60ch}
+.back{margin-top:var(--sp-6);font-size:14px;color:var(--tx3)}
+.back a{min-height:44px;display:inline-flex;align-items:center}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top"><div class="wrap">
+  <a class="brand" href="../../index.html" aria-label="ExoFab public intake, home"><img src="../../assets/mark.svg" width="22" height="22" alt="">EXOFAB</a>
+  <span class="chip">public project</span>
+  <nav class="nav" aria-label="Primary"><a href="../../submit.html">Submit</a><a href="../../queue.html">Queue</a></nav>
+</div></header>
+
+<main id="main">
+<div class="wrap page">
+  <p class="notice ex-banner" role="status">Example · simulation · status and activity only. No separate working repo yet. No delivered artifact yet.</p>
+  <div class="ph">
+    <div>
+      <span class="mono">ExoFab project</span>
+      <h1 id="title">Harbor Light</h1>
+      <p class="lede">A tiny public tide and ferry board for coastal volunteers, readable in sun and rain.</p>
+      <div class="meta">
+        <span class="st building">Building</span>
+        <span class="stage">Stage 3 of 5 · Prototype</span>
+        <span class="id mono" style="font-size:11px">idea-0042</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <section class="panel section" aria-labelledby="work-h">
+      <h2 id="work-h">Working surface (stand-in)</h2>
+      <p class="gap-note">Linked stand-in only (branch work/harbor-light): not a separate working repo and not evidence of a built result. Provisioning a dedicated repo still needs approval.</p>
+      <p style="margin:var(--sp-3) 0 0;color:var(--tx2);font-size:15px">This page shows public status and activity only—not a shipped build.</p>
+      <div class="links">
+        <a class="btn sm" href="https://github.com/Moissanite-Labs/exoframe/tree/work/harbor-light">View stand-in branch<span class="sr"> for Harbor Light</span></a>
+      </div>
+      <p style="margin:var(--sp-3) 0 0;color:var(--tx3);font-size:14px">Opened Oct 28, 2026</p>
+    </section>
+
+    <section class="panel section" aria-labelledby="act-h">
+      <h2 id="act-h">Recent activity</h2>
+      <ul class="act" id="activity">
+<li class="act-item"><time datetime="2026-11-05T14:30:00Z">Nov 05, 2026 · 14:30 UTC</time><span class="act-kind">build</span><p>Prototype ring bonded · Loom</p></li>
+<li class="act-item"><time datetime="2026-10-29T09:00:00Z">Oct 29, 2026 · 09:00 UTC</time><span class="act-kind">shape</span><p>Shape locked with coastal volunteers · Rosa</p></li>
+<li class="act-item"><time datetime="2026-10-28T16:00:00Z">Oct 28, 2026 · 16:00 UTC</time><span class="act-kind">accept</span><p>Accepted from public queue · ExoFab</p></li>
+      </ul>
+    </section>
+  </div>
+
+  <p class="back"><a href="../../queue.html#idea-0042">← Back to queue</a> · <a href="../../index.html">Home</a></p>
+  <p class="ex" style="margin-top:var(--sp-4)">Generated from project-sources/harbor-light/ · edit activity there, then run aggregation</p>
+</div>
+</main>
+<footer class="foot"><div class="wrap">
+  <p>Moissanite Labs · <a href="https://github.com/Moissanite-Labs/exofab">ExoFab</a></p>
+  <p>We build in the open, with the people we build for.</p>
+</div></footer>
+</body>
+</html>
