@@ -1,5 +1,10 @@
 [
   {
+    "at": "2026-11-05T18:00:00Z",
+    "kind": "prototype",
+    "summary": "Sun-readable contrast pass on tide glyph · Rosa"
+  },
+  {
     "at": "2026-11-05T14:30:00Z",
     "kind": "build",
     "summary": "Prototype ring bonded · Loom"
