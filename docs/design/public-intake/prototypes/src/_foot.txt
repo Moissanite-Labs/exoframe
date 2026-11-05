@@ -1,0 +1,4 @@
+<footer class="foot"><div class="wrap">
+  <p>Moissanite Labs · <a href="https://github.com/Moissanite-Labs/exofab">ExoFab</a></p>
+  <p>We build in the open, with the people we build for.</p>
+</div></footer>

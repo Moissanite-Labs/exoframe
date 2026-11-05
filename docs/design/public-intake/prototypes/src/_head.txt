@@ -1,0 +1,6 @@
+<a class="skip" href="#main">Skip to content</a>
+<header class="top"><div class="wrap">
+  <a class="brand" href="index.html" aria-label="ExoFab public intake, home"><img src="../assets/mark.svg" width="22" height="22" alt="">EXOFAB</a>
+  <span class="chip">public intake</span>
+  <nav class="nav" aria-label="Primary"><a href="submit.html"NAV1>Submit</a><a href="queue.html"NAV2>Queue</a></nav>
+</div></header>
