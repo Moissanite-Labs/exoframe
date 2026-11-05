@@ -1,0 +1,35 @@
+[
+  {
+    "at": "2026-11-04T15:00:00Z",
+    "actor": "agent",
+    "who": "Loom",
+    "verb": "Publish to testers",
+    "pending": true
+  },
+  {
+    "at": "2026-11-02T11:00:00Z",
+    "actor": "agent",
+    "who": "Keel",
+    "verb": "Opened working branch",
+    "link": "https://github.com/Moissanite-Labs/exoframe/tree/work/harbor-light"
+  },
+  {
+    "at": "2026-10-30T09:00:00Z",
+    "actor": "agent",
+    "who": "Scout",
+    "verb": "Shaped brief"
+  },
+  {
+    "at": "2026-10-29T16:00:00Z",
+    "actor": "human",
+    "who": "ExoFab",
+    "verb": "Accepted in public queue"
+  },
+  {
+    "at": "2026-10-28T10:00:00Z",
+    "actor": "human",
+    "who": "Rosa",
+    "verb": "Submitted idea",
+    "link": "../../queue.html#idea-0042"
+  }
+]

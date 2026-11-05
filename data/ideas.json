@@ -1,12 +1,12 @@
 {
   "example": true,
   "ideas": [
-    {"id":"idea-0042","title":"Harbor Light","blurb":"A tiny public tide and ferry board for coastal volunteers, readable in sun and rain.","status":"building","stage":2,"opened":"2026-10-28","synbios_url":"#synbios-placeholder","submitter":"Rosa"},
+    {"id":"idea-0042","title":"Harbor Light","blurb":"A tiny public tide and ferry board for coastal volunteers, readable in sun and rain.","status":"building","stage":2,"opened":"2026-10-28","synbios_url":null,"submitter":"Rosa"},
     {"id":"idea-0041","title":"Seed library check-out","blurb":"Let a neighbourhood seed library track what's borrowed and what came back.","status":"submitted","stage":0,"opened":"2026-11-03","synbios_url":null,"submitter":null},
     {"id":"idea-0040","title":"Shelter bed count","blurb":"One page that shows open beds at local shelters tonight, updated by staff.","status":"accepted","stage":1,"opened":"2026-11-01","synbios_url":null,"submitter":"Marcus"},
     {"id":"idea-0039","title":"Choir part trainer","blurb":"Play just your voice part of a piece, slowed down, so you can practise at home.","status":"submitted","stage":0,"opened":"2026-10-30","synbios_url":null,"submitter":null},
-    {"id":"idea-0037","title":"Bike-repair queue","blurb":"A sign-up line for a volunteer bike workshop so nobody waits in the cold.","status":"building","stage":3,"opened":"2026-10-21","synbios_url":"#synbios-placeholder","submitter":"Jun"},
-    {"id":"idea-0034","title":"Allotment water rota","blurb":"Shared watering rota for an allotment with reminders and swaps.","status":"shipped","stage":4,"opened":"2026-10-12","synbios_url":"#synbios-placeholder","submitter":"Priya"},
-    {"id":"idea-0031","title":"Library hold notifier","blurb":"A text when a reserved book is ready, for people without smartphones.","status":"shipped","stage":4,"opened":"2026-10-05","synbios_url":"#synbios-placeholder","submitter":null}
+    {"id":"idea-0037","title":"Bike-repair queue","blurb":"A sign-up line for a volunteer bike workshop so nobody waits in the cold.","status":"building","stage":3,"opened":"2026-10-21","synbios_url":null,"submitter":"Jun"},
+    {"id":"idea-0034","title":"Allotment water rota","blurb":"Shared watering rota for an allotment with reminders and swaps.","status":"shipped","stage":4,"opened":"2026-10-12","synbios_url":null,"submitter":"Priya"},
+    {"id":"idea-0031","title":"Library hold notifier","blurb":"A text when a reserved book is ready, for people without smartphones.","status":"shipped","stage":4,"opened":"2026-10-05","synbios_url":null,"submitter":null}
   ]
 }
