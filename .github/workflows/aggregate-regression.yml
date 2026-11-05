@@ -1,0 +1,30 @@
+name: Aggregate regression
+
+on:
+  pull_request:
+    paths:
+      - "scripts/**"
+      - "project-sources/**"
+      - ".github/workflows/**"
+  push:
+    branches:
+      - main
+    paths:
+      - "scripts/**"
+
+permissions:
+  contents: read
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch allowlisted project branch for import test
+        run: git fetch --depth=1 origin project/harbor-light || true
+
+      - name: Run aggregation regression harness
+        run: python3 scripts/test_aggregate_regression.py

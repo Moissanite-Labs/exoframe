@@ -1,66 +1,85 @@
 # Project flow architecture (v0)
 
-ExoFab public **project pages** sit beside the existing public intake on `Moissanite-Labs/exoframe` (GitHub Pages). This slice proves one end-to-end path: branch-per-project sources → aggregation → `/projects/<slug>/`.
+ExoFab public **project pages** sit beside the existing public intake on `Moissanite-Labs/exoframe` (GitHub Pages).
+
+## What publishes to Pages (main)
+
+GitHub Pages serves **`main`**. After merge, published project HTML comes from:
+
+1. **`project-sources/<slug>/`** on `main` (committed snapshot), **or**
+2. A **manual** workflow on **`main`** that copies JSON from an allowlisted **`project/<slug>`** branch, then aggregates.
+
+There is **no automatic** “push to `project/harbor-light` → Pages updates” job in v0. Updating the project branch alone does nothing to Pages until someone runs import + aggregate (locally or via manual dispatch on `main`).
 
 ## Explicit gaps (EXAMPLE · Harbor Light)
 
-Harbor Light is labeled **Example · simulation**. For v0:
-
-1. **No separate working repo yet** — Ahraz’s dedicated working-repo requirement is not met. No new `Moissanite-Labs/<repo>` was provisioned (needs approval).
-2. **No delivered / built artifact yet** — the public project page shows **status and activity only**, not a shipped product or build output.
-3. **`work/harbor-light` is a labeled stand-in** — a tiny branch with a README placeholder only. It does **not** prove a built result and does **not** replace a real working repo.
-
-We checked existing public Moissanite-Labs repos; none is a Harbor Light working surface, so the stand-in branch remains.
+1. **No separate working repo yet** — dedicated working-repo provisioning not done; `work/harbor-light` is a **stand-in** only.
+2. **No delivered / built artifact yet** — public page shows **status + activity only**.
+3. **Synbios not wired** — queue/project may say “Building in Synbios” as **text**; no real Synbios URL until `https://…` exists in data.
+4. **Example · simulation** labeling on the Harbor Light page.
 
 ## Source model
 
-| Branch | Role |
-|--------|------|
-| `project/<slug>` | Source of truth for `manifest.json`, `activity.json`, and a short README |
-| `work/<slug>` | **Stand-in only** until a separate working repo is approved |
+| Location | Role |
+|----------|------|
+| `project/<slug>` branch | JSON source (`manifest.json`, `activity.json` at branch root) |
+| `project-sources/<slug>/` on `main` | Aggregation input snapshot on Pages |
+| `work/<slug>` | Stand-in README only — not a built result |
 
-On **main**, `project-sources/<slug>/` mirrors JSON from `project/<slug>` so aggregation can run in CI and locally without executing code from project branches (v0). Keep branch and snapshot in sync when updating activity.
+## Local vs CI
 
-## Published surface
+| | **Local / PR checkout** | **GitHub Actions (trusted `main`)** |
+|--|-------------------------|-------------------------------------|
+| Scripts | `scripts/aggregate_projects.py` from your checkout | Same files checked out at **default-branch SHA once** per run (`contents: read`) |
+| Input JSON | `project-sources/` in working tree (`EXOFRAME_PROJECT_SOURCES` optional) | `project-sources/` on `main`, **or** import via `import_project_branch.py` after `git fetch origin project/<slug>` |
+| Import branch | `python3 scripts/import_project_branch.py harbor-light` (after fetch) | Manual **workflow_dispatch** on **`main` only** with “Import from project branch” |
+| Output | `projects/`, `data/projects.json` | Commit job writes only those paths + updated `project-sources/` when imported (`contents: write`) |
 
-- `data/projects.json` — index of published projects (slug, `idea_id`, status, …)
-- `projects/<slug>/index.html` — static project page (`tokens.css`, EXAMPLE banner when `example: true`)
-- Intake `queue.html` links ideas to `projects/<slug>/` when `idea_id` matches
+**Prove branch → page locally:**
 
-## Aggregation
+```bash
+git fetch origin project/harbor-light
+python3 scripts/import_project_branch.py harbor-light
+python3 scripts/aggregate_projects.py --force
+# open projects/harbor-light/index.html
+```
+
+**Publish via trusted workflow (after merge to main):** Actions → *Aggregate project pages* → Run on **`main`** → enable import for `harbor-light`. No push trigger on `project/**` branches.
+
+Push to `main` under `project-sources/**` still runs aggregation from the committed snapshot (no branch import).
+
+## Activity JSON schema (validated)
+
+Newest first, max **12** rows:
+
+| Field | Required | Notes |
+|-------|----------|--------|
+| `at` | yes | ISO timestamp or date |
+| `actor` | yes | `human` or `agent` |
+| `who` | yes | Display name |
+| `verb` | yes | Short public phrase |
+| `link` | no | Allowlisted `https://…` or relative `../../queue.html#…` |
+| `pending` | no | `true` → ice “waiting on a human decision” (no approve/decline UI) |
+
+(`kind` / `summary` are **not** accepted — use `actor` / `who` / `verb`.)
+
+## Aggregation commands
 
 ```bash
 python3 scripts/aggregate_projects.py
-python3 scripts/aggregate_projects.py --force   # ignore fingerprint skip
+python3 scripts/aggregate_projects.py --force
+python3 scripts/test_aggregate_regression.py   # CI harness
 ```
-
-- **Allowlist + validation**: slug regex, schema, `https` URLs on allowlisted GitHub paths, HTML escaping, writes restricted to `projects/<slug>/` and `data/projects.json`.
-- **Stale guard**: stores input SHA256 under `projects/<slug>/.source-sha256`; skips regeneration when outputs already match sources (unless `--force`).
-- **Trusted CI**: `.github/workflows/aggregate-projects.yml` lives on **main** only. Jobs always `checkout` **ref: main** for the workflow and `scripts/aggregate_projects.py`. Aggregate job uses `contents: read`; only the commit job uses `contents: write`. Never run a workflow or script checked out from a `project/**` branch with write credentials.
-- Triggers: `workflow_dispatch` and pushes to `main` under `project-sources/**` only (not `projects/**`). Bot commits use `[aggregate]` and `[skip ci]`; skip when the previous commit was already aggregation.
-
-### Updating activity (permitted event for v0)
-
-1. Edit `project-sources/harbor-light/activity.json` (prepend `{ "at", "kind", "summary" }`, newest first).
-2. Mirror the same JSON on branch `project/harbor-light`.
-3. Merge to `main` (or push snapshot). CI aggregates into `projects/harbor-light/`.
-4. Or run `workflow_dispatch` on main after the snapshot lands.
-
-No GitHub App, no `repository_dispatch`, no cross-repo automation in v0.
 
 ## Security
 
-- Untrusted input is **JSON parse only**; no templates or scripts from project branches are executed during aggregation.
-- Private material must not appear in public `manifest.json` / `activity.json`.
-- EXAMPLE labeling on page and in copy.
-
-## Deferred
-
-- Cloudflare Worker intake / Turnstile / API stubs
-- GitHub App and cross-repo dispatch
-- Automatic provisioning of `Moissanite-Labs/<new-repo>`
-- Fetching `project/*` branches in Actions (read-only JSON copy into `project-sources/` first)
+- JSON parse only from project branches; **never** run scripts/workflows from `project/**` with write credentials.
+- Workflow file + aggregator pinned to **default branch SHA** each run.
+- `workflow_dispatch` runs only when `github.ref` is the default branch.
+- Writes restricted to `project-sources/<slug>/`, `projects/<slug>/`, `data/projects.json`.
+- Loop prevention: workflow path filter `project-sources/**`; `[aggregate]` commits do not match. **No HEAD~1 skip** (source commits after bot commits still aggregate).
 
 ## Related docs
 
-- Public intake design (unchanged): [`public-intake/SPEC.md`](public-intake/SPEC.md)
+- Page IA: [`public-intake/PROJECT-PAGE.md`](public-intake/PROJECT-PAGE.md)
+- Intake SPEC: [`public-intake/SPEC.md`](public-intake/SPEC.md)

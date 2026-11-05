@@ -13,7 +13,9 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCES = ROOT / "project-sources"
+SOURCES = Path(
+    __import__("os").environ.get("EXOFRAME_PROJECT_SOURCES", str(ROOT / "project-sources"))
+).resolve()
 ALLOWLIST = frozenset({"harbor-light"})
 SLUG_RE = re.compile(r"^[a-z0-9][a-z0-9-]{0,62}$")
 STATUSES = frozenset({"submitted", "accepted", "building", "shipped"})
@@ -90,8 +92,8 @@ def validate_working_repo(url: str) -> str:
 
 
 def validate_public_href(url: str, field: str) -> str:
-    if url in SYNBIOS_STUBS:
-        return url
+    if url in SYNBIOS_STUBS or url.startswith("#"):
+        raise SystemExit(f"{field}: invalid or stub URL")
     if url.startswith("../../"):
         if ".." in url[6:] or url.startswith("../../.."):
             raise SystemExit(f"{field}: invalid relative link")
@@ -99,13 +101,15 @@ def validate_public_href(url: str, field: str) -> str:
     return validate_working_repo(url)
 
 
-def validate_optional_url(value: object, field: str) -> str | None:
+def normalize_synbios_url(value: object, field: str) -> str | None:
     if value is None:
         return None
     if not isinstance(value, str):
         raise SystemExit(f"{field} must be a string or null")
-    return validate_public_href(value.strip(), field)
-
+    url = value.strip()
+    if not url or url in SYNBIOS_STUBS or url.startswith("#"):
+        return None
+    return validate_working_repo(url)
 
 def validate_manifest(manifest: object, slug: str) -> dict:
     if not isinstance(manifest, dict):
@@ -128,7 +132,7 @@ def validate_manifest(manifest: object, slug: str) -> dict:
         raise SystemExit(f"{slug}: invalid blurb")
     manifest = dict(manifest)
     manifest["working_repo"] = validate_working_repo(str(manifest["working_repo"]))
-    manifest["synbios_url"] = validate_optional_url(manifest.get("synbios_url"), f"{slug}: synbios_url")
+    manifest["synbios_url"] = normalize_synbios_url(manifest.get("synbios_url"), f"{slug}: synbios_url")
     submitter = manifest.get("submitter")
     if submitter is not None and (not isinstance(submitter, str) or not submitter.strip()):
         raise SystemExit(f"{slug}: invalid submitter")
@@ -258,7 +262,8 @@ def render_project_page(manifest: dict, activity: list) -> str:
         banner = '<p class="notice ex-banner" role="status">Example project · simulation</p>'
         gap_note = (
             '<p class="gap-note">Status and activity only. No separate working repo yet; '
-            "no delivered artifact. Linked <code>work/harbor-light</code> branch is a stand-in, "
+            "no delivered artifact; Synbios is not linked on the public site yet. "
+            "Linked <code>work/harbor-light</code> branch is a stand-in, "
             "not proof of a built result.</p>"
         )
 
@@ -277,7 +282,7 @@ def render_project_page(manifest: dict, activity: list) -> str:
             f'<a class="btn ice" href="{esc(working_repo)}" rel="noopener noreferrer" '
             f'target="_blank">Open working repo<span class="sr"> for {esc(title)}</span> →</a>'
         )
-        if synbios_url and synbios_url != working_repo:
+        if synbios_url and synbios_url.startswith("https://") and synbios_url != working_repo:
             syn_label = (
                 "See how it was built" if status == "shipped" else "Building in Synbios"
             )
