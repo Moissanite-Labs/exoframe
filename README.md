@@ -15,7 +15,7 @@
 |------|--------|
 | Public intake UI (`index.html`, `submit.html`, `queue.html`) | **Live** on GitHub Pages (Crystal Lattice styling; see [`docs/design/public-intake/SPEC.md`](docs/design/public-intake/SPEC.md)) |
 | Queue / idea list | **Example + manual** — prototype data in `data/ideas.json` (inlined in `queue.html` for `file://`); not wired to a live API |
-| Submit form | **UI only** — no backend intake pipeline on Pages |
+| Submit form | **Worker-backed when configured** — `assets/config.js` sets `EXO_API_BASE`; see [`docs/design/public-intake/WORKER-DEPLOY.md`](docs/design/public-intake/WORKER-DEPLOY.md) |
 | Project pages `projects/<slug>/` | **Live** when generated and merged to `main` (merge deploys Pages) |
 | Synbios links on queue | **Missing** — no live Synbios feed on the public site |
 | Automatic “project branch → Pages” | **Manual** — run import + aggregate (see [`docs/design/project-flow.md`](docs/design/project-flow.md)) |
@@ -60,3 +60,9 @@ python3 scripts/test_aggregate_regression.py
 ## Deploy note
 
 Merging to **`main`** updates the **live** GitHub Pages site. Treat merge as production deploy; review before merge.
+
+## Intake queue sync
+
+Workflow [`.github/workflows/sync-ideas-from-issues.yml`](.github/workflows/sync-ideas-from-issues.yml) rebuilds `data/ideas.json` from open GitHub issues labeled `intake:public` when an issue is edited, labeled `intake:listed`, or when you run **workflow_dispatch**.
+
+Commits pushed by **`GITHUB_TOKEN`** do **not** trigger other GitHub Actions workflows (including the default Pages build). After an `[intake-sync]` commit lands on `main`, either push a normal commit to kick Pages, merge via a human-owned token, or run your Pages deploy workflow manually (**workflow_dispatch**) if you have one configured.
