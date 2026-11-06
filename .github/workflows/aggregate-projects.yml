@@ -17,6 +17,7 @@ on:
         type: choice
         options:
           - harbor-light
+          - rift-manager
       force:
         description: Force regeneration even when fingerprints match
         type: boolean

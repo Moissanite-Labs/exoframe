@@ -77,26 +77,15 @@ h1 em{font-family:var(--serif);font-weight:400;font-style:italic;color:var(--tx2
   </div>
   <figure class="panel latbox" style="margin:0" aria-labelledby="lat-h">
     <div class="lathead">
-      <h2 id="lat-h">Harbor Light <small>A tiny tide and ferry board for coastal volunteers</small></h2>
-      <span class="notice"><span aria-hidden="true">◇</span> Example data · simulation</span>
+      <h2 id="lat-h">Rift Manager <small>LoL esports management sim — real PoC case study</small></h2>
+      <span class="notice"><span aria-hidden="true">◇</span> Public repo + live game</span>
     </div>
-    <ol class="stages" aria-label="Stages">
-      <li><b>RING 0</b>Idea</li><li><b>RING 1</b>Shape</li><li class="now" aria-current="step"><b>RING 2 · NOW</b>Prototype</li>
-    </ol>
-    <div class="lat" id="lat">
-      <svg id="svg" viewBox="-150 -140 300 280" role="group" aria-label="Example lattice for Harbor Light: 1 idea node, 6 shape nodes, 7 prototype nodes bonded and 1 waiting on a human decision. Use Tab to explore each piece."></svg>
-      <div class="tip" id="tip" aria-hidden="true"></div>
+    <p class="cap" style="margin-top:var(--sp-3)">ExoFab did not build this game. exoframe showcases <a href="https://github.com/ahrazzle/rift-manager">ahrazzle/rift-manager</a> and the <a href="https://www.rift.askaconsult.com/" rel="noopener noreferrer">live deployment</a> so you can see a honest project page — status, manual activity snapshot, and links to a real shipped browser game — before the standalone ExoFab product exists.</p>
+    <div class="ctas" style="margin-top:var(--sp-4)">
+      <a class="btn ice" href="projects/rift-manager/">Open project page</a>
+      <a class="tlink" href="https://www.rift.askaconsult.com/" rel="noopener noreferrer">Play live game →</a>
     </div>
-    <ul class="legend" aria-label="Legend">
-      <li><i class="lh" aria-hidden="true"></i>Person</li>
-      <li><i class="la" aria-hidden="true"></i>Agent</li>
-      <li><i class="lp" aria-hidden="true"></i>Waiting on a person</li>
-    </ul>
-    <figcaption class="cap">Each bonded node is a finished piece of work, by a person or an agent. The ice pulse is the piece waiting on a human decision. When a ring fills, that stage is done and the next one starts.</figcaption>
-    <div class="ctrl">
-      <span class="ex">Fictional project · no real data</span>
-      <button class="btn sm" id="motion" aria-pressed="false" type="button">Pause motion</button>
-    </div>
+    <p class="ex" style="margin-top:var(--sp-4)">Activity snapshots are refreshed manually (America/Chicago timestamp on the project page). <a href="projects/harbor-light/">Harbor Light</a> is a retired fictional simulation.</p>
   </figure>
 </section>
 
@@ -112,42 +101,5 @@ h1 em{font-family:var(--serif);font-weight:400;font-style:italic;color:var(--tx2
   <p>Moissanite Labs · <a href="https://github.com/Moissanite-Labs/exofab">ExoFab</a></p>
   <p>We build in the open, with the people we build for.</p>
 </div></footer>
-
-<script>
-(()=>{const $=id=>document.getElementById(id),NS="http://www.w3.org/2000/svg",svg=$('svg'),tip=$('tip'),lat=$('lat');
-const S=31,R3=Math.sqrt(3),dirs=[[1,0],[1,-1],[0,-1],[-1,0],[-1,1],[0,1]];
-const ring=k=>{if(!k)return[[0,0]];const o=[];let q=dirs[4][0]*k,r=dirs[4][1]*k;for(let i=0;i<6;i++)for(let j=0;j<k;j++){o.push([q,r]);q+=dirs[i][0];r+=dirs[i][1];}return o};
-const px=(q,r)=>[S*R3*(q+r/2),S*1.5*r];
-// Example data: Harbor Light (fictional)
-const T={0:[["h","Rosa","original idea: one board for tides and ferries"]],
-1:[["h","Rosa","volunteer interviews"],["a","Scout","tide-data sources survey"],["h","Dev","who checks it, and when"],["a","Keel","ferry timetable feasibility"],["a","Scout","existing boards review"],["h","Rosa","success criteria"]],
-2:[["a","Loom","board layout"],["a","Keel","tide feed parser"],["h","Dev","big-type readability test"],["a","Loom","ferry delay banner"],["a","Keel","offline cache"],["h","Rosa","volunteer walkthrough"],["a","Loom","publish to testers","p"],["a","Scout","glare check, outdoor screen"]]};
-const nodes=[];
-for(let k=0;k<=2;k++)ring(k).forEach(([q,r],i)=>{const [x,y]=px(q,r),d=T[k][i];nodes.push(d?{k,x,y,kind:d[0],who:d[1],what:d[2],st:d[3]==="p"?"pending":"done"}:{k,x,y,st:"ghost"});});
-const el=(t,a,p)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);(p||svg).appendChild(e);return e};
-el('defs',{}).innerHTML='<radialGradient id="gc" cx=".35" cy=".3"><stop offset="0" stop-color="#ffd9b5"/><stop offset=".6" stop-color="#f2ab6d"/><stop offset="1" stop-color="#a8632c"/></radialGradient><radialGradient id="gs" cx=".35" cy=".3"><stop offset="0" stop-color="#dcf2ff"/><stop offset=".6" stop-color="#7cc6f2"/><stop offset="1" stop-color="#3a7ea8"/></radialGradient><radialGradient id="bg"><stop offset="0" stop-color="#1b2633" stop-opacity=".95"/><stop offset="1" stop-color="#08090a" stop-opacity="0"/></radialGradient>';
-el('ellipse',{cx:0,cy:0,rx:150,ry:135,fill:'url(#bg)'});
-const hex=k=>ring(k).filter((_,i)=>i%k===0).map(([q,r])=>px(q,r).join(',')).join(' ');
-for(let k=1;k<=3;k++)el('polygon',{points:hex(k),fill:'none',stroke:k<3?'#232a31':'#171b20','stroke-width':1,'stroke-dasharray':k===3?'2 5':'none'});
-const eg=el('g',{'aria-hidden':'true'}),adj=(A,B)=>Math.hypot(A.x-B.x,A.y-B.y)<S*R3+1;
-for(let a=0;a<nodes.length;a++)for(let b=a+1;b<nodes.length;b++){const A=nodes[a],B=nodes[b];if(!adj(A,B)||A.st==='ghost'||B.st==='ghost')continue;el('line',{x1:A.x,y1:A.y,x2:B.x,y2:B.y,class:'edge'+(A.st==='pending'||B.st==='pending'?' ghost':'')},eg)}
-const ng=el('g');
-const shape=(n,g,r)=>n.kind==='h'?el('circle',{cx:n.x,cy:n.y,r,class:'core',fill:'url(#gc)'},g):el('polygon',{points:`${n.x},${n.y-r*1.25} ${n.x+r*1.25},${n.y} ${n.x},${n.y+r*1.25} ${n.x-r*1.25},${n.y}`,class:'core',fill:'url(#gs)'},g);
-const stTxt={done:'bonded, finished',pending:'waiting on a human decision'},stage=['Idea','Shape','Prototype'];
-nodes.forEach(n=>{if(n.st==='ghost'){el('circle',{cx:n.x,cy:n.y,r:2,class:'ghostn','aria-hidden':'true'},ng);return}
- const g=el('g',{class:'node '+n.st,tabindex:0,role:'img','aria-label':`${n.kind==='h'?'Person':'Agent'} ${n.who}: ${n.what}. ${stage[n.k]} stage, ${stTxt[n.st]}.`},ng);
- el('circle',{cx:n.x,cy:n.y,r:22,fill:'transparent'},g);el('circle',{cx:n.x,cy:n.y,r:13,class:'hlring'},g);
- if(n.st==='pending'){el('circle',{cx:n.x,cy:n.y,r:9,class:'pulse'},g);el('circle',{cx:n.x,cy:n.y,r:11,class:'ring'},g);const c=shape(n,g,5.5);c.setAttribute('fill','none');c.setAttribute('stroke','#e9f4ff');c.setAttribute('stroke-width','1.4')}
- else shape(n,g,n.k===0?8:6);
- const show=()=>{tip.innerHTML=`<span class="mono" style="color:${n.kind==='h'?'var(--carbon)':'var(--silicon)'}">${n.kind==='h'?'Person':'Agent'} · ${stTxt[n.st]}</span>${n.who} — ${n.what}`;
-  const sr=svg.getBoundingClientRect(),lr=lat.getBoundingClientRect(),vb=svg.viewBox.baseVal,sc=sr.width/vb.width;
-  let x=(n.x-vb.x)*sc+14,y=(n.y-vb.y)*sc-20;x=Math.max(0,Math.min(x,lr.width-232));tip.style.left=x+'px';tip.style.top=y+'px';tip.classList.add('on')};
- const hide=()=>tip.classList.remove('on');
- g.addEventListener('focus',show);g.addEventListener('blur',hide);g.addEventListener('pointerenter',show);g.addEventListener('pointerleave',hide);});
-document.addEventListener('keydown',e=>{if(e.key==='Escape')tip.classList.remove('on')});
-const m=$('motion');m.addEventListener('click',()=>{const p=document.documentElement.classList.toggle('motion-paused');m.setAttribute('aria-pressed',p);m.textContent=p?'Resume motion':'Pause motion'});
-if(matchMedia('(prefers-reduced-motion: reduce)').matches){m.hidden=true}
-})();
-</script>
 </body>
 </html>

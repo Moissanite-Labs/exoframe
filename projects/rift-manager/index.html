@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rift Manager · ExoFab project</title>
+<meta name="description" content="League of Legends esports management sim: build your roster, coach your team, and chase regional and world titles. Built in the public ahrazzle/rift-manager repo with a live browser game — showcased here as exoframe’s real PoC case study (ExoFab did not originate this game).">
+<meta name="theme-color" content="#08090a">
+<link rel="icon" href="../../assets/mark.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../tokens.css">
+<style>
+.page{padding:var(--sp-6) 0 var(--sp-7)}
+.hero{display:grid;gap:var(--sp-3)}
+h1{font-weight:500;font-size:clamp(30px,6vw,42px);letter-spacing:-.03em;line-height:1.08;margin:8px 0 0}
+.lede{color:var(--tx2);margin:0;max-width:60ch;font-size:17px}
+.hero-meta{font-family:var(--mono);font-size:12px;color:var(--tx2);letter-spacing:.04em;margin:0}
+.hero-meta a{color:var(--ice)}
+.actions{display:flex;flex-wrap:wrap;gap:var(--sp-3) var(--sp-4);align-items:center;margin:var(--sp-5) 0 var(--sp-4)}
+.ex-banner{margin-bottom:var(--sp-3)}
+.gap-note{margin:0 0 var(--sp-4);color:var(--tx3);font-size:14px;max-width:65ch}
+.gap-note code{font-family:var(--mono);font-size:12px}
+.stages{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;list-style:none;padding:0;margin:0 0 var(--sp-6)}
+.stages li{border:1px solid var(--line);border-radius:var(--r-m);padding:8px 6px;font-size:12px;color:var(--tx2);text-align:center}
+.stages li b{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--tx3);font-weight:400}
+.stages li[aria-current=step]{border-color:var(--ice);color:var(--tx)}
+.activity{list-style:none;padding:0;margin:0;display:grid;gap:var(--sp-4)}
+.activity .act-item{padding:var(--sp-4) var(--sp-5);border:1px solid var(--line);border-radius:var(--r-l);background:var(--s1)}
+.activity time{display:block;font-family:var(--mono);font-size:11px;color:var(--tx3);letter-spacing:.06em}
+.act-body{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0 0;color:var(--tx2);font-size:15px}
+.act-mark{display:inline-block;width:10px;height:10px;flex:0 0 auto}
+.act-mark.human{border-radius:50%;border:1.5px solid var(--carbon);background:var(--carbon-dim)}
+.act-mark.agent{background:var(--silicon);transform:rotate(45deg) scale(.85)}
+.act-link{font-size:14px;min-height:44px;display:inline-flex;align-items:center}
+.act-pending{border-color:#e9f4ff55}
+.act-pending-note{margin:8px 0 0;font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--ice);text-transform:uppercase}
+.act-empty{padding:var(--sp-5);color:var(--tx2);text-align:center}
+.back{margin-top:var(--sp-5);font-size:14px;color:var(--tx3)}
+.back a{min-height:44px;display:inline-flex;align-items:center}
+@media(max-width:520px){.stages{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top"><div class="wrap">
+  <a class="brand" href="../../index.html" aria-label="ExoFab public intake, home"><img src="../../assets/mark.svg" width="22" height="22" alt="">EXOFAB</a>
+  <span class="chip">public project</span>
+  <nav class="nav" aria-label="Primary"><a href="../../submit.html">Submit</a><a href="../../queue.html">Queue</a></nav>
+</div></header>
+
+<main id="main">
+<div class="wrap page">
+  <p class="notice ex-banner" role="status">PoC case study · external project</p>
+  <p class="gap-note">Snapshot as of Nov 5, 2026 · 6:59 PM CST (America/Chicago). Activity below was copied manually from public GitHub merges and tags; refresh is manual — not a live Synbios feed. ExoFab did not originate this game — it is built and maintained in <a href="https://github.com/ahrazzle/rift-manager">ahrazzle/rift-manager</a>. exoframe showcases the public repo and live deployment as a proof-of-concept project page.</p>
+  <header class="hero">
+    <span class="st shipped">Shipped</span>
+    <h1 id="title">Rift Manager</h1>
+    <p class="lede">League of Legends esports management sim: build your roster, coach your team, and chase regional and world titles. Built in the public ahrazzle/rift-manager repo with a live browser game — showcased here as exoframe’s real PoC case study (ExoFab did not originate this game).</p>
+    <p class="hero-meta">Opened Oct 22, 2026 · <a href="../../queue.html#case-rift-manager">case-rift-manager</a></p>
+  </header>
+
+  <div class="actions"><a class="btn ice" href="https://github.com/ahrazzle/rift-manager" rel="noopener noreferrer" target="_blank">Open working repo<span class="sr"> for Rift Manager</span> →</a> <a class="btn sm" href="https://www.rift.askaconsult.com/" rel="noopener noreferrer" target="_blank">Play live game<span class="sr"> for Rift Manager</span> →</a></div>
+
+  <ol class="stages" aria-label="Project stage">
+<li><b>Idea</b></li>
+<li><b>Shape</b></li>
+<li><b>Prototype</b></li>
+<li><b>Build</b></li>
+<li aria-current="step"><b>Ship</b></li>
+  </ol>
+
+  <section aria-labelledby="act-h">
+    <h2 id="act-h" class="mono" style="font-size:12px;margin:0 0 var(--sp-4);color:var(--tx3)">Recent activity</h2>
+    <ol class="activity">
+<li class="act-item"><time datetime="2026-11-06T00:50:43Z">Nov 06, 2026 · 00:50 UTC</time><p class="act-body"><span class="act-mark human" aria-hidden="true"></span><span class="sr">Person</span> <span>ahrazzle · Merged PR #38 · component-render tests</span> <a class="act-link" href="https://github.com/ahrazzle/rift-manager/pull/38">Details<span class="sr"> for Merged PR #38 · component-render tests</span> →</a></p></li>
+<li class="act-item"><time datetime="2026-11-05T22:04:29Z">Nov 05, 2026 · 22:04 UTC</time><p class="act-body"><span class="act-mark human" aria-hidden="true"></span><span class="sr">Person</span> <span>ahrazzle · Merged PR #37 · Transfers Near offseason</span> <a class="act-link" href="https://github.com/ahrazzle/rift-manager/pull/37">Details<span class="sr"> for Merged PR #37 · Transfers Near offseason</span> →</a></p></li>
+<li class="act-item"><time datetime="2026-11-05T20:40:10Z">Nov 05, 2026 · 20:40 UTC</time><p class="act-body"><span class="act-mark human" aria-hidden="true"></span><span class="sr">Person</span> <span>orda-aska · Merged PR #36 · IGL tactical pause layout</span> <a class="act-link" href="https://github.com/ahrazzle/rift-manager/pull/36">Details<span class="sr"> for Merged PR #36 · IGL tactical pause layout</span> →</a></p></li>
+<li class="act-item"><time datetime="2026-11-05T20:10:39Z">Nov 05, 2026 · 20:10 UTC</time><p class="act-body"><span class="act-mark human" aria-hidden="true"></span><span class="sr">Person</span> <span>orda-aska · Merged PR #34 · development visibility</span> <a class="act-link" href="https://github.com/ahrazzle/rift-manager/pull/34">Details<span class="sr"> for Merged PR #34 · development visibility</span> →</a></p></li>
+<li class="act-item"><time datetime="2026-11-05T19:52:08Z">Nov 05, 2026 · 19:52 UTC</time><p class="act-body"><span class="act-mark human" aria-hidden="true"></span><span class="sr">Person</span> <span>orda-aska · Merged PR #35 · About / Community page</span> <a class="act-link" href="https://github.com/ahrazzle/rift-manager/pull/35">Details<span class="sr"> for Merged PR #35 · About / Community page</span> →</a></p></li>
+<li class="act-item"><time datetime="2026-11-05T17:33:54Z">Nov 05, 2026 · 17:33 UTC</time><p class="act-body"><span class="act-mark human" aria-hidden="true"></span><span class="sr">Person</span> <span>ahrazzle · Git tag v1.0.0 on main (no published GitHub Release yet)</span> <a class="act-link" href="https://github.com/ahrazzle/rift-manager/tree/v1.0.0">Details<span class="sr"> for Git tag v1.0.0 on main (no published GitHub Release yet)</span> →</a></p></li>
+<li class="act-item"><time datetime="2026-10-22T13:01:36Z">Oct 22, 2026 · 13:01 UTC</time><p class="act-body"><span class="act-mark human" aria-hidden="true"></span><span class="sr">Person</span> <span>ahrazzle · Public repo opened</span> <a class="act-link" href="https://github.com/ahrazzle/rift-manager">Details<span class="sr"> for Public repo opened</span> →</a></p></li>
+<li class="act-item"><time datetime="2026-11-05T18:59:56-06:00">Nov 05, 2026 · 18:59 UTC</time><p class="act-body"><span class="act-mark human" aria-hidden="true"></span><span class="sr">Person</span> <span>exoframe snapshot · Live game verified at rift.askaconsult.com</span> <a class="act-link" href="https://www.rift.askaconsult.com/">Details<span class="sr"> for Live game verified at rift.askaconsult.com</span> →</a></p></li>
+    </ol>
+  </section>
+
+  <p class="back"><a href="../../queue.html#case-rift-manager">← Back to queue</a> · <a href="../../index.html">Home</a></p>
+  <p class="ex" style="margin-top:var(--sp-4)">Generated from project-sources/rift-manager/ · edit activity there, then run aggregation</p>
+</div>
+</main>
+<footer class="foot"><div class="wrap">
+  <p>Moissanite Labs · <a href="https://github.com/Moissanite-Labs/exofab">ExoFab</a></p>
+  <p>We build in the open, with the people we build for.</p>
+</div></footer>
+</body>
+</html>
