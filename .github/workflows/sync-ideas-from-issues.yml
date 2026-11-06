@@ -13,9 +13,8 @@ jobs:
   sync:
     if: >-
       github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'issues' && github.event.action == 'edited') ||
-      (github.event_name == 'issues' && github.event.action == 'labeled' &&
-        github.event.label.name == 'intake:listed')
+      github.event.action == 'edited' ||
+      (github.event.action == 'labeled' && github.event.label.name == 'intake:listed')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
