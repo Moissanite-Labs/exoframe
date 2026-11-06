@@ -7,11 +7,14 @@ Prototypes: `docs/design/public-intake/prototypes/`. Visual provenance: Crystal 
 ## 1. Purpose and non-goals
 **Purpose.** A public surface where anyone can (1) suggest something for ExoFab to build, (2) see what was picked, and (3) watch it move from idea to shipped. Shipping fast, in public, is the proof that ExoFab works.
 
-**Non-goals.**
+**Non-goals (intake shell only).**
 - Not the full ExoFab hub. No sign-in, workspaces, or project internals.
 - Not Synbios. "Building in Synbios" is an outbound link only.
-- No decision flows (Approve / Decline / send to testers) on the public site. Those stay inside ExoFab.
 - No comments, voting, or accounts in v1.
+
+**Project pages (`projects/<slug>/`).** Restored Crystal Lattice composition (PR #20) applies on real project routes — lattice, census, decision/sources/signature area, crew, live work, trace, and milestone treatment — fed by `project-sources/<slug>/lattice.json` when present. Missing data renders **Pending** inside panels, not removed UI.
+
+Legacy note: §6 “Strip” applied only to the slim Harbor Light landing prototype, not to project pages after the 2026-11 restore (see AUDIT.md).
 
 ## 2. Brand rule
 - The product is **ExoFab** (the existing demo writes "Exofab"; either is fine, but pick **ExoFab** for this site and stay consistent). The wordmark is mono uppercase `EXOFAB`.

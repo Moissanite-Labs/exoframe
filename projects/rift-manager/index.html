@@ -8,88 +8,125 @@
 <meta name="theme-color" content="#08090a">
 <link rel="icon" href="../../assets/mark.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../../tokens.css">
+<link rel="stylesheet" href="../../assets/crystal-lattice.css">
 <style>
-.page{padding:var(--sp-6) 0 var(--sp-7)}
-.hero{display:grid;gap:var(--sp-3)}
-h1{font-weight:500;font-size:clamp(30px,6vw,42px);letter-spacing:-.03em;line-height:1.08;margin:8px 0 0}
-.lede{color:var(--tx2);margin:0;max-width:60ch;font-size:17px}
-.hero-meta{font-family:var(--mono);font-size:12px;color:var(--tx2);letter-spacing:.04em;margin:0}
-.hero-meta a{color:var(--ice)}
-.actions{display:flex;flex-wrap:wrap;gap:var(--sp-3) var(--sp-4);align-items:center;margin:var(--sp-5) 0 var(--sp-4)}
-.ex-banner{margin-bottom:var(--sp-3)}
-.gap-note{margin:0 0 var(--sp-4);color:var(--tx3);font-size:14px;max-width:65ch}
-.gap-note code{font-family:var(--mono);font-size:12px}
-.stages{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;list-style:none;padding:0;margin:0 0 var(--sp-6)}
-.stages li{border:1px solid var(--line);border-radius:var(--r-m);padding:8px 6px;font-size:12px;color:var(--tx2);text-align:center}
-.stages li b{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--tx3);font-weight:400}
-.stages li[aria-current=step]{border-color:var(--ice);color:var(--tx)}
-.activity{list-style:none;padding:0;margin:0;display:grid;gap:var(--sp-4)}
-.activity .act-item{padding:var(--sp-4) var(--sp-5);border:1px solid var(--line);border-radius:var(--r-l);background:var(--s1)}
-.activity time{display:block;font-family:var(--mono);font-size:11px;color:var(--tx3);letter-spacing:.06em}
-.act-body{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0 0;color:var(--tx2);font-size:15px}
-.act-mark{display:inline-block;width:10px;height:10px;flex:0 0 auto}
-.act-mark.human{border-radius:50%;border:1.5px solid var(--carbon);background:var(--carbon-dim)}
-.act-mark.agent{background:var(--silicon);transform:rotate(45deg) scale(.85)}
-.act-mark.unknown{border-radius:2px;border:1px solid var(--tx3);background:var(--s2)}
-.act-link{font-size:14px;min-height:44px;display:inline-flex;align-items:center}
-.act-pending{border-color:#e9f4ff55}
-.act-pending-note{margin:8px 0 0;font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--ice);text-transform:uppercase}
-.act-empty{padding:var(--sp-5);color:var(--tx2);text-align:center}
-.back{margin-top:var(--sp-5);font-size:14px;color:var(--tx3)}
-.back a{min-height:44px;display:inline-flex;align-items:center}
-@media(max-width:520px){.stages{grid-template-columns:repeat(2,1fr)}}
+.exo-site-nav{border-bottom:1px solid var(--line)}
+.exo-site-nav .wrap{display:flex;align-items:center;gap:var(--sp-4);padding:10px var(--sp-6)}
+.exo-site-nav .brand{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-decoration:none;color:var(--tx)}
+.exo-site-nav .chip{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;border:1px dashed var(--line-2);color:var(--tx2);padding:3px 8px;border-radius:999px}
+.exo-site-nav nav{margin-left:auto;display:flex;gap:12px;font-size:14px}
+.exo-site-nav a{color:var(--tx2);text-decoration:none}
+.notice.ex-banner{color:var(--tx2);font-size:14px}
 </style>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
-<header class="top"><div class="wrap">
-  <a class="brand" href="../../index.html" aria-label="ExoFab public intake, home"><img src="../../assets/mark.svg" width="22" height="22" alt="">EXOFAB</a>
+<header class="exo-site-nav"><div class="wrap">
+  <a class="brand" href="../../index.html"><img src="../../assets/mark.svg" width="22" height="22" alt="">EXOFAB</a>
   <span class="chip">public project</span>
-  <nav class="nav" aria-label="Primary"><a href="../../submit.html">Submit</a><a href="../../queue.html">Queue</a></nav>
+  <nav aria-label="Primary"><a href="../../submit.html">Submit</a><a href="../../queue.html">Queue</a></nav>
 </div></header>
-
+<p class="notice ex-banner wrap" role="status" style="margin:0 auto;max-width:1440px;padding:12px 24px 0">PoC case study · external project · Snapshot as of Nov 5, 2026 · 6:59 PM CST (America/Chicago). Activity below was copied manually from public GitHub merges and tags; refresh is manual — not a live Synbios feed.</p>
 <main id="main">
-<div class="wrap page">
-  <p class="notice ex-banner" role="status">PoC case study · external project</p>
-  <p class="gap-note">Snapshot as of Nov 5, 2026 · 6:59 PM CST (America/Chicago). Activity below was copied manually from public GitHub merges and tags; refresh is manual — not a live Synbios feed. ExoFab did not originate this game — it is built and maintained in <a href="https://github.com/ahrazzle/rift-manager">ahrazzle/rift-manager</a>. exoframe showcases the public repo and live deployment as a proof-of-concept project page.</p>
-  <header class="hero">
-    <span class="st shipped">Shipped</span>
-    <h1 id="title">Rift Manager</h1>
-    <p class="lede">League of Legends esports management sim: build your roster, coach your team, and chase regional and world titles. Built in the public ahrazzle/rift-manager repo with a live browser game — showcased here as exoframe’s real PoC case study (ExoFab did not originate this game).</p>
-    <p class="hero-meta">Opened Oct 22, 2026 · <a href="../../queue.html#case-rift-manager">case-rift-manager</a></p>
-  </header>
+<div id="exo-crystal-root">
+<!-- Crystal project view shell (embed via aggregate; config via #exo-lattice-data or window.__EXO_LATTICE__) -->
+<div class="exo-crystal" data-exo-crystal-shell>
+<section class="demo-banner" data-exo-rehearsal-banner hidden aria-label="Rehearsal information">
+<div><strong data-exo-rehearsal-label>EXOFAB / REHEARSAL</strong><p data-exo-rehearsal-copy></p></div>
+<div class="demo-tools">
+<a href="#exo-crystal-decision" data-exo-try-decision>Try the decision ↓</a>
+<button type="button" id="demoMotion" aria-pressed="false">Pause motion</button>
+<button type="button" id="demoReset" data-exo-rehearsal-only hidden>Reset demo</button>
+<button type="button" id="demoExport" data-exo-rehearsal-only hidden>Download demo log</button>
+<a href="https://github.com/Moissanite-Labs/exoframe" rel="noopener noreferrer">Source &amp; project</a>
+</div>
+</section>
+<noscript><p class="demo-banner">JavaScript is required for the interactive project view. Static summaries remain readable without it.</p></noscript>
 
-  <div class="actions"><a class="btn ice" href="https://github.com/ahrazzle/rift-manager" rel="noopener noreferrer" target="_blank">Open working repo<span class="sr"> for Rift Manager</span> →</a> <a class="btn sm" href="https://www.rift.askaconsult.com/" rel="noopener noreferrer" target="_blank">Play live game<span class="sr"> for Rift Manager</span> →</a></div>
+<header class="top">
+  <div class="brand">
+    <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><polygon points="11,1 20,6 20,16 11,21 2,16 2,6" fill="none" stroke="#eceef0" stroke-width="1.2"/><circle cx="11" cy="11" r="2.4" fill="#f2ab6d"/><rect x="13.6" y="4.6" width="3.2" height="3.2" transform="rotate(45 15.2 6.2)" fill="#7cc6f2"/><line x1="11" y1="11" x2="15.2" y2="6.2" stroke="#eceef0" stroke-width=".8"/></svg>
+    <span aria-hidden="true">EXOFAB</span>
+  </div>
+  <nav class="crumbs" aria-label="Breadcrumb" data-exo-crumbs></nav>
+  <div class="spacer"></div>
+  <span class="chip" data-exo-header-chip hidden></span>
+  <div class="me" data-exo-visitor hidden></div>
+</header>
 
-  <ol class="stages" aria-label="Project stage">
-<li><b>Idea</b></li>
-<li><b>Shape</b></li>
-<li><b>Prototype</b></li>
-<li><b>Build</b></li>
-<li aria-current="step"><b>Ship</b></li>
-  </ol>
-
-  <section aria-labelledby="act-h">
-    <h2 id="act-h" class="mono" style="font-size:12px;margin:0 0 var(--sp-4);color:var(--tx3)">Recent activity</h2>
-    <ol class="activity">
-<li class="act-item"><time datetime="2026-11-06T00:50:43Z">Nov 5, 2026 · 6:50 PM CST</time><p class="act-body"><span class="act-mark unknown" aria-hidden="true"></span><span class="sr">Account</span> <span>orda-aska · Merged PR #38 · component-render tests</span> <a class="act-link" href="https://github.com/ahrazzle/rift-manager/pull/38">Details<span class="sr"> for Merged PR #38 · component-render tests</span> →</a></p></li>
-<li class="act-item"><time datetime="2026-11-05T22:04:29Z">Nov 5, 2026 · 4:04 PM CST</time><p class="act-body"><span class="act-mark unknown" aria-hidden="true"></span><span class="sr">Account</span> <span>orda-aska · Merged PR #37 · Transfers Near offseason</span> <a class="act-link" href="https://github.com/ahrazzle/rift-manager/pull/37">Details<span class="sr"> for Merged PR #37 · Transfers Near offseason</span> →</a></p></li>
-<li class="act-item"><time datetime="2026-11-05T20:40:10Z">Nov 5, 2026 · 2:40 PM CST</time><p class="act-body"><span class="act-mark unknown" aria-hidden="true"></span><span class="sr">Account</span> <span>orda-aska · Merged PR #36 · IGL tactical pause layout</span> <a class="act-link" href="https://github.com/ahrazzle/rift-manager/pull/36">Details<span class="sr"> for Merged PR #36 · IGL tactical pause layout</span> →</a></p></li>
-<li class="act-item"><time datetime="2026-11-05T20:10:39Z">Nov 5, 2026 · 2:10 PM CST</time><p class="act-body"><span class="act-mark unknown" aria-hidden="true"></span><span class="sr">Account</span> <span>orda-aska · Merged PR #34 · development visibility</span> <a class="act-link" href="https://github.com/ahrazzle/rift-manager/pull/34">Details<span class="sr"> for Merged PR #34 · development visibility</span> →</a></p></li>
-<li class="act-item"><time datetime="2026-11-05T19:52:08Z">Nov 5, 2026 · 1:52 PM CST</time><p class="act-body"><span class="act-mark unknown" aria-hidden="true"></span><span class="sr">Account</span> <span>orda-aska · Merged PR #35 · About / Community page</span> <a class="act-link" href="https://github.com/ahrazzle/rift-manager/pull/35">Details<span class="sr"> for Merged PR #35 · About / Community page</span> →</a></p></li>
-<li class="act-item"><time datetime="2026-11-05T17:33:54Z">Nov 5, 2026 · 11:33 AM CST</time><p class="act-body"><span class="act-mark unknown" aria-hidden="true"></span><span class="sr">Account</span> <span>ahrazzle · Git tag v1.0.0 on main (no published GitHub Release yet)</span> <a class="act-link" href="https://github.com/ahrazzle/rift-manager/tree/v1.0.0">Details<span class="sr"> for Git tag v1.0.0 on main (no published GitHub Release yet)</span> →</a></p></li>
-<li class="act-item"><time datetime="2026-10-22T13:01:36Z">Oct 22, 2026 · 8:01 AM CDT</time><p class="act-body"><span class="act-mark unknown" aria-hidden="true"></span><span class="sr">Account</span> <span>ahrazzle · Public repo opened</span> <a class="act-link" href="https://github.com/ahrazzle/rift-manager">Details<span class="sr"> for Public repo opened</span> →</a></p></li>
-<li class="act-item"><time datetime="2026-11-05T18:59:56-06:00">Nov 5, 2026 · 6:59 PM CST</time><p class="act-body"><span class="act-mark unknown" aria-hidden="true"></span><span class="sr">Account</span> <span>exoframe · Live game verified at rift.askaconsult.com</span> <a class="act-link" href="https://www.rift.askaconsult.com/">Details<span class="sr"> for Live game verified at rift.askaconsult.com</span> →</a></p></li>
-    </ol>
+<main class="wrap" id="demo-start">
+  <section class="hero" aria-labelledby="proj-h">
+    <div>
+      <div class="mono" data-exo-eyebrow></div>
+      <h1 id="proj-h"><span data-exo-title></span> <em data-exo-subtitle></em></h1>
+      <p data-exo-blurb></p>
+      <div class="actions" data-exo-project-actions style="margin-top:12px"></div>
+    </div>
+    <ol class="stages" id="stages" aria-label="Project stages" data-exo-stages></ol>
   </section>
 
-  <p class="back"><a href="../../queue.html#case-rift-manager">← Back to queue</a> · <a href="../../index.html">Home</a></p>
-  <p class="ex" style="margin-top:var(--sp-4)">Generated from project-sources/rift-manager/ · edit activity there, then run aggregation</p>
-</div>
+  <div class="grid">
+    <section class="panel stagepanel col-c" aria-labelledby="lat-h">
+      <div class="ph"><h2 id="lat-h">The crystal</h2><span class="mono">each node is a piece of work</span></div>
+      <div class="lat" id="lat">
+        <svg id="svg" viewBox="-204 -184 408 368" role="group" aria-label="Project lattice"></svg>
+        <div class="tip" id="tip" aria-hidden="true"></div>
+      </div>
+      <ol class="census" aria-label="Rings of the crystal, one per stage" data-exo-census></ol>
+      <div class="latfoot"><span id="latcount"></span><span data-exo-latfoot-note>Rings grow outward, idea to ship</span></div>
+    </section>
+
+    <div class="col-d">
+      <section class="panel decision" id="decision" aria-labelledby="dec-h" data-exo-decision-panel></section>
+    </div>
+  </div>
+
+  <div class="lower">
+    <section class="panel" aria-labelledby="crew-h">
+      <div class="ph"><h2 id="crew-h">Crew</h2><span class="mono" data-exo-crew-meta></span></div>
+      <ul class="crew" data-exo-crew-list></ul>
+      <form class="crew-interest" data-exo-role-form hidden>
+        <label class="mono" for="exoRoleSlot">I can help</label>
+        <select id="exoRoleSlot" name="slot" data-exo-role-select></select>
+        <button type="submit" class="btn ghost">Send interest</button>
+        <p class="why" data-exo-role-status hidden role="status"></p>
+      </form>
+      <div class="legend"><span><i class="lh"></i>Carbon · person</span><span><i class="la"></i>Silicon · agent</span></div>
+    </section>
+
+    <section class="panel" aria-labelledby="live-h">
+      <div class="ph"><h2 id="live-h">Live work</h2><span class="mono" data-exo-live-meta></span></div>
+      <ul class="live" data-exo-live-list></ul>
+    </section>
+
+    <section class="panel tracep" aria-labelledby="tr-h">
+      <div class="ph"><h2 id="tr-h">Trace</h2><span class="mono">where work came from · hover to find it</span></div>
+      <ol class="trace" id="trace" data-exo-trace-list></ol>
+    </section>
+  </div>
+
+  <footer data-exo-crystal-footer></footer>
 </main>
-<footer class="foot"><div class="wrap">
-  <p>Moissanite Labs · <a href="https://github.com/Moissanite-Labs/exofab">ExoFab</a></p>
-  <p>We build in the open, with the people we build for.</p>
-</div></footer>
+
+<div class="ms" id="ms" role="dialog" aria-modal="false" aria-labelledby="msT" hidden>
+  <svg class="gem" viewBox="0 0 44 44" aria-hidden="true">
+    <defs><linearGradient id="fireg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f2ab6d"/><stop offset=".35" stop-color="#f6e27a"/><stop offset=".6" stop-color="#8fe0b0"/><stop offset=".8" stop-color="#7cc6f2"/><stop offset="1" stop-color="#b9a2ff"/></linearGradient></defs>
+    <polygon class="facet" points="22,2 40,12 40,32 22,42 4,32 4,12" fill="none" stroke="url(#fireg)" stroke-width="1.5"/>
+    <polygon class="facet" points="22,10 32,16 32,28 22,34 12,28 12,16" fill="url(#fireg)" opacity=".25" style="animation-delay:.15s"/>
+    <polygon class="facet" points="22,10 32,16 22,22 12,16" fill="#fff" opacity=".35" style="animation-delay:.3s"/>
+  </svg>
+  <div><div class="t1" id="msT"></div><div class="t2" data-exo-ms-sub></div></div>
+  <button type="button" class="mini" id="msClose">Close</button>
+</div>
+<div class="sr" aria-live="polite" id="announce"></div>
+<div class="sr" aria-live="polite" id="announce2"></div>
+</div>
+
+</div>
+<script type="application/json" id="exo-lattice-data">{"schema":"exoframe/lattice/1","slug":"rift-manager","apiBase":"","currentStage":4,"rehearsal":{"enabled":true,"label":"EXOFAB / TEST DECISION REHEARSAL","copy":"The labeled test decision below exercises approve / decline / revise / revoke in your browser. Nothing is sent externally. Imported Rift history on the lattice is real sourced work; reset demo clears only rehearsal choices, never project records."},"project":{"id":"case-rift-manager","title":"Rift Manager","subtitle":"League esports management sim","origin":"Imported existing project","imported":"Imported existing project","blurb":"League of Legends esports management sim built in ahrazzle/rift-manager with a live browser game. ExoFab did not originate this product — original idea and team formation are not recorded here.","crumbs":["Moissanite Labs","ExoFab","Rift Manager"],"eyebrow":"case-rift-manager / Project view · imported project","links":{"working_repo":"https://github.com/ahrazzle/rift-manager","live_game":"https://www.rift.askaconsult.com/","source_branch":"https://github.com/Moissanite-Labs/exoframe/tree/project/rift-manager","design_provenance":"https://github.com/Moissanite-Labs/exofab/pull/17"},"snapshot_at":"2026-11-05T18:59:56-06:00","snapshot_note":"Lattice seeded from verified public GitHub merges, tags, and live game checks through PR #39 (merged after the 6:59 PM CST import snapshot). Refresh is manual until automation lands.","footer":"<span>Exoframe · Crystal Lattice project view · imported work stays attributed to its sources · pending panels are honest gaps, not fiction</span><em>Different minds. Shared possibility.</em> <a href=\"https://github.com/Moissanite-Labs/exofab/pull/17\">Design provenance: Crystal Lattice, PR #17</a>"},"stages":[{"n":"001","name":"Idea","progress":100},{"n":"002","name":"Shape","progress":100},{"n":"003","name":"Prototype","progress":100},{"n":"004","name":"Build","progress":100},{"n":"005","name":"Ship","progress":72}],"works":[{"id":"0-0","stage":0,"state":"done","actor":"unknown","title":"Repository import · PR #1","label":"unknown · Repository import · PR #1","url":"https://github.com/ahrazzle/rift-manager/pull/1","hash":"rift-pr1"},{"id":"1-0","stage":1,"state":"done","actor":"unknown","title":"Broadcast Night UI/UX · PR #11","label":"unknown · Broadcast Night UI/UX · PR #11","url":"https://github.com/ahrazzle/rift-manager/pull/11","hash":"rift-pr11"},{"id":"1-1","stage":1,"state":"done","actor":"unknown","title":"Design tokens · PR #13","label":"unknown · Design tokens · PR #13","url":"https://github.com/ahrazzle/rift-manager/pull/13","hash":"rift-pr13"},{"id":"2-0","stage":2,"state":"done","actor":"unknown","title":"Three-lane map · PR #22","label":"unknown · Three-lane map · PR #22","url":"https://github.com/ahrazzle/rift-manager/pull/22","hash":"rift-pr22"},{"id":"3-0","stage":3,"state":"done","actor":"unknown","title":"Club pennant brand · PR #23","label":"unknown · Club pennant brand · PR #23","url":"https://github.com/ahrazzle/rift-manager/pull/23","hash":"rift-pr23"},{"id":"3-1","stage":3,"state":"done","actor":"unknown","title":"Match sim layout · PR #39","label":"unknown · Match sim layout · PR #39","url":"https://github.com/ahrazzle/rift-manager/pull/39","hash":"rift-pr39"},{"id":"4-0","stage":4,"state":"done","actor":"unknown","title":"Version 1.0.0 · PR #25","label":"unknown · Version 1.0.0 · PR #25","url":"https://github.com/ahrazzle/rift-manager/pull/25","hash":"rift-pr25"},{"id":"4-1","stage":4,"state":"done","actor":"unknown","title":"Git tag v1.0.0","label":"unknown · Git tag v1.0.0 (no published Release)","url":"https://github.com/ahrazzle/rift-manager/tree/v1.0.0","hash":"rift-tag-v1"},{"id":"4-2","stage":4,"state":"done","actor":"unknown","title":"Live game verified","label":"unknown · Live game at rift.askaconsult.com","url":"https://www.rift.askaconsult.com/","hash":"rift-live"},{"id":"4-3","stage":4,"state":"done","actor":"unknown","title":"Social preview assets · PR #14","label":"unknown · Social cards · PR #14","url":"https://github.com/ahrazzle/rift-manager/pull/14","hash":"rift-pr14"},{"id":"4-4","stage":4,"state":"done","actor":"unknown","title":"Help shape invite · PR #30","label":"unknown · Community invite UI · PR #30","url":"https://github.com/ahrazzle/rift-manager/pull/30","hash":"rift-pr30"},{"id":"4-5","stage":4,"state":"done","actor":"unknown","title":"About / Community page · PR #35","label":"unknown · About / Community · PR #35","url":"https://github.com/ahrazzle/rift-manager/pull/35","hash":"rift-pr35"},{"id":"4-6","stage":4,"state":"done","actor":"unknown","title":"Feedback roadmap · PR #32","label":"unknown · Roadmap from feedback · PR #32","url":"https://github.com/ahrazzle/rift-manager/pull/32","hash":"rift-pr32"},{"id":"4-7","stage":4,"state":"forming","actor":"unknown","title":"Formal GitHub Release publication · Pending","label":"unknown · Formal Release publication · Pending","hash":"pending-release"},{"id":"4-8","stage":4,"state":"forming","actor":"unknown","title":"Launch outcomes · Pending","label":"unknown · Launch outcomes · Pending","hash":"pending-launch"},{"id":"4-9","stage":4,"state":"forming","actor":"unknown","title":"Promotion reach · Pending","label":"unknown · Campaign traction · Pending","hash":"pending-promo"},{"id":"4-10","stage":4,"state":"forming","actor":"unknown","title":"Outside community activity · Pending","label":"unknown · Member activity · Pending","hash":"pending-community"}],"shipPending":[],"crew":{"roles":[{"slot":"lead","role":"Lead","scope":"approves","status":"pending"},{"slot":"design","role":"Interaction design","scope":"reviews","status":"pending"},{"slot":"build","role":"Build","scope":"drafts","status":"pending"},{"slot":"launch","role":"Launch coordination","scope":"asks first","status":"pending"},{"slot":"community","role":"Community","scope":"reviews","status":"pending"},{"slot":"agent-research","role":"Research agent","scope":"drafts","status":"pending"}]},"liveWork":[],"trace":[{"node":"4-6","work":"Feedback folded into roadmap (PR #32)","time":"Nov 5","from":"from <b>player feedback</b> · authors not recorded","hash":"rift-pr32","url":"https://github.com/ahrazzle/rift-manager/pull/32"},{"node":"3-1","work":"Match sim layout merged (PR #39)","time":"Nov 5","from":"from <b>post-snapshot import</b>","hash":"rift-pr39","url":"https://github.com/ahrazzle/rift-manager/pull/39"},{"node":"4-2","work":"Live game verified at rift.askaconsult.com","time":"Nov 5","from":"from <b>exoframe snapshot check</b>","hash":"rift-live","url":"https://www.rift.askaconsult.com/"},{"node":"4-1","work":"v1.0.0 tag on main (no GitHub Release yet)","time":"Nov 5","from":"from <b>PR #25 merge</b>","hash":"rift-tag-v1","url":"https://github.com/ahrazzle/rift-manager/tree/v1.0.0"},{"node":"0-0","work":"Existing game imported to repo (PR #1)","time":"Oct 22","from":"from <b>ahrazzle/rift-manager</b> · origin not recorded on ExoFab","hash":"rift-pr1","url":"https://github.com/ahrazzle/rift-manager/pull/1"}],"decision":{"id":"test-rift-playtest-interest","test":true,"label":"Decision TEST · in-product rehearsal","status":"pending","title":"Record visitor interest in a future Rift playtest list","proposer":{"name":"ExoFab intake","actor":"unknown","when":"Snapshot","build":"v1.0.0 tag"},"reasoning":"This is a clearly labeled test decision for the Crystal Lattice UI. It does not email anyone, invite testers, or change the game. Approving only stores your choice when the participation API is deployed.","sources":[{"n":1,"node":"4-2","who":"Live deployment","kind":"record","what":"Playable game at rift.askaconsult.com","meta":"rift-live · verified Nov 5","url":"https://www.rift.askaconsult.com/"},{"n":2,"node":"4-4","who":"Community prep","kind":"record","what":"Help-shape invite merged (PR #30)","meta":"rift-pr30 · no member counts recorded","url":"https://github.com/ahrazzle/rift-manager/pull/30"}],"consequences":[{"dt":"In this scenario","dd":"Your approval would add a <span>pending interest record</span> only."},{"dt":"Data shared","dd":"Display name if provided · <span>no email collected in v0</span>."},{"dt":"How to undo","dd":"Revoke in this panel · <span>nothing was sent outbound</span>."}],"principle":{"quote":"Learning a preference does not grant permission.","note":"Past approvals on this test decision do not authorize outbound mail or invites."}}}</script>
+<script src="../../assets/config.js"></script>
+<script src="../../assets/crystal-lattice.js"></script>
+</main>
+<p class="sr"><a href="../../queue.html#case-rift-manager">Back to queue</a></p>
 </body>
 </html>

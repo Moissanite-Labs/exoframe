@@ -14,7 +14,7 @@
 | Area | Status |
 |------|--------|
 | Public intake UI (`index.html`, `submit.html`, `queue.html`) | **Live** on GitHub Pages (Crystal Lattice styling; see [`docs/design/public-intake/SPEC.md`](docs/design/public-intake/SPEC.md)) |
-| Queue / idea list | **Example + manual** — prototype data in `data/ideas.json` (inlined in `queue.html` for `file://`); not wired to a live API |
+| Queue / idea list | **Committed JSON** — `data/ideas.json` (regenerated from GitHub issues via intake sync workflow) |
 | Submit form | **Worker-backed when configured** — `assets/config.js` sets `EXO_API_BASE`; see [`docs/design/public-intake/WORKER-DEPLOY.md`](docs/design/public-intake/WORKER-DEPLOY.md) |
 | Project pages `projects/<slug>/` | **Live** when generated and merged to `main` (merge deploys Pages) |
 | Synbios links on queue | **Missing** — no live Synbios feed on the public site |
@@ -25,8 +25,8 @@
 The primary public example is **[Rift Manager](projects/rift-manager/)** — a real game maintained in [ahrazzle/rift-manager](https://github.com/ahrazzle/rift-manager), playable at [https://www.rift.askaconsult.com/](https://www.rift.askaconsult.com/).
 
 - **Honesty:** ExoFab / exoframe **did not originate** this game. We showcase a **public repo and live deployment** as the PoC “project page” shape.
-- **Activity on the project page:** Copied **manually** from public GitHub merges/tags. Each refresh is labeled with a snapshot time (America/Chicago). **Not** a live Synbios stream. Activity rows use `actor: unknown` — GitHub handles are account labels only, not human/agent attribution.
-- **Sources:** allowlisted branch **`project/rift-manager`** (`manifest.json`, `activity.json` at branch root) → import → `project-sources/rift-manager/` → `scripts/aggregate_projects.py` → `projects/rift-manager/`.
+- **Project page:** Full **Crystal Lattice** composition (`projects/rift-manager/`) seeded from verified public sources (PRs #1, #11, #13, #22, #23, #25, #14, #30, #32, #35, #39, v1.0.0 tag, live game). Gaps (formal Release, launch outcomes, traction, community activity, opted-in crew) show **Pending**. Activity JSON remains for import provenance; the lattice is authoritative for the visitor view.
+- **Sources:** allowlisted branch **`project/rift-manager`** (`manifest.json`, `activity.json`, optional `lattice.json`) → import → `project-sources/rift-manager/` → `scripts/aggregate_projects.py` → `projects/rift-manager/`.
 
 ## Harbor Light (retired simulation)
 
@@ -37,7 +37,7 @@ The primary public example is **[Rift Manager](projects/rift-manager/)** — a r
 ```
 project/<slug> branch (JSON at branch root)
         ↓  scripts/import_project_branch.py  (optional; manual or workflow_dispatch)
-project-sources/<slug>/{manifest.json,activity.json}
+project-sources/<slug>/{manifest.json,activity.json[,lattice.json]}
         ↓  scripts/aggregate_projects.py
 projects/<slug>/index.html + activity.json
         ↓  merge to main

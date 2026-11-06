@@ -51,9 +51,10 @@
           { n: "004", name: "Build", progress: 0 },
           { n: "005", name: "Ship", progress: 0 },
         ];
+    const apiBase = (raw.apiBase || global.EXO_API_BASE || "").replace(/\/$/, "");
     return {
       slug: raw.slug || "",
-      apiBase: (raw.apiBase || "").replace(/\/$/, ""),
+      apiBase,
       rehearsal: Object.assign({ enabled: false, label: "Rehearsal" }, raw.rehearsal || {}),
       project: raw.project || {},
       stages,
@@ -207,6 +208,14 @@
     if (sub) { sub.textContent = p.subtitle || ""; sub.hidden = !p.subtitle; }
     const bl = $("[data-exo-blurb]");
     if (bl) bl.textContent = p.blurb || "";
+    const act = $("[data-exo-project-actions]");
+    if (act && p.links) {
+      const bits = [];
+      if (p.links.working_repo) bits.push(`<a class="btn primary" href="${esc(p.links.working_repo)}" rel="noopener noreferrer" target="_blank">Open working repo →</a>`);
+      if (p.links.live_game) bits.push(`<a class="btn ghost" href="${esc(p.links.live_game)}" rel="noopener noreferrer" target="_blank">Play live game →</a>`);
+      if (p.links.source_branch) bits.push(`<a class="btn link" href="${esc(p.links.source_branch)}" rel="noopener noreferrer" target="_blank">project/${esc(ctx.cfg.slug)} source</a>`);
+      act.innerHTML = bits.join(" ");
+    }
     const stagesEl = $("[data-exo-stages]");
     if (stagesEl) {
       stagesEl.innerHTML = ctx.cfg.stages.map((st, i) => {
