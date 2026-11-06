@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Submit an idea · ExoFab public intake</title>
-<meta name="description" content="Send ExoFab an idea to build. No account needed. Your email is only used for updates and is never shown publicly.">
+<meta name="description" content="Send ExoFab an idea to build. No account needed. Public ideas appear on the queue after you submit.">
 <meta name="theme-color" content="#08090a">
 <link rel="icon" href="assets/mark.svg" type="image/svg+xml">
 <link rel="stylesheet" href="tokens.css">
@@ -17,17 +17,16 @@ form{padding:var(--sp-5)}
 label,.lbl{display:block;font-weight:500;margin-bottom:6px}
 .opt{color:var(--tx3);font-weight:400;font-size:14px}
 .hint{display:block;color:var(--tx3);font-size:14px;margin-top:6px}
-input[type=text],input[type=email],textarea{width:100%;font:16px/1.5 var(--sans);color:var(--tx);background:var(--s0);border:1px solid var(--line-2);border-radius:var(--r-m);padding:12px 14px;min-height:48px}
+input[type=text],textarea{width:100%;font:16px/1.5 var(--sans);color:var(--tx);background:var(--s0);border:1px solid var(--line-2);border-radius:var(--r-m);padding:12px 14px;min-height:48px}
 textarea{min-height:140px;resize:vertical}
 input:hover,textarea:hover{border-color:#3d444d}
 input:focus-visible,textarea:focus-visible{outline:2px solid var(--focus);outline-offset:1px;border-color:transparent}
 input[aria-invalid=true],textarea[aria-invalid=true]{border-color:var(--err)}
 .err{color:var(--err);font-size:14px;margin-top:6px;display:none}
 .err.on{display:block}
-.chk{display:flex;gap:12px;align-items:flex-start;min-height:44px;cursor:pointer}
-.chk input{width:22px;height:22px;margin:2px 0 0;accent-color:var(--ice);flex:none}
-.chk .lbl{margin:0}
 .req{color:var(--tx3);font-size:14px;margin:0 0 var(--sp-4)}
+.disclosure{color:var(--tx2);font-size:14px;border:1px dashed var(--line-2);border-radius:var(--r-m);padding:var(--sp-3) var(--sp-4);margin:0 0 var(--sp-4)}
+.hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
 .actions{display:flex;flex-wrap:wrap;gap:var(--sp-4);align-items:center}
 .sum{border:1px solid var(--err);border-radius:var(--r-m);padding:var(--sp-3) var(--sp-4);margin-bottom:var(--sp-4);color:var(--tx)}
 .sum ul{margin:6px 0 0;padding-left:20px}.sum a{color:var(--err)}
@@ -36,7 +35,10 @@ input[aria-invalid=true],textarea[aria-invalid=true]{border-color:var(--err)}
 .done p{color:var(--tx2);margin:0 0 var(--sp-4)}
 .qid{font-family:var(--mono);font-size:15px;color:var(--ice);border:1px solid #e9f4ff55;border-radius:var(--r-s);padding:2px 8px}
 .gem{display:block}
+#turnstile{margin:var(--sp-4) 0}
 </style>
+<script src="assets/config.js"></script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -55,6 +57,7 @@ input[aria-invalid=true],textarea[aria-invalid=true]{border-color:var(--err)}
     <form class="panel" id="f" novalidate>
       <div class="sum" id="sum" role="alert" tabindex="-1" hidden><b>Please fix 1 thing before sending:</b><ul id="sumList"></ul></div>
       <p class="req">Fields marked <span aria-hidden="true">*</span><span class="sr">with an asterisk</span> are required.</p>
+      <p class="disclosure" id="pub-note">This form is <strong>public intake only</strong>. Your title, description, and optional name may appear on the public queue. We do not accept private submissions here.</p>
       <div class="f"><label for="title">Title <span aria-hidden="true">*</span></label>
         <input type="text" id="title" name="title" required maxlength="80" autocomplete="off" aria-describedby="title-h title-e">
         <span class="hint" id="title-h">A short name. Example: "Tide board for the harbour".</span>
@@ -67,23 +70,24 @@ input[aria-invalid=true],textarea[aria-invalid=true]{border-color:var(--err)}
         <input type="text" id="who" name="who" maxlength="120" autocomplete="off"></div>
       <div class="f"><label for="name">Your name <span class="opt">(optional)</span></label>
         <input type="text" id="name" name="name" maxlength="80" autocomplete="name" aria-describedby="name-h">
-        <span class="hint" id="name-h">Shown on the queue if you list publicly. Leave blank to stay anonymous.</span></div>
-      <div class="f"><label for="email">Contact email <span class="opt">(optional)</span></label>
-        <input type="email" id="email" name="email" maxlength="200" autocomplete="email" inputmode="email" aria-describedby="email-h email-e">
-        <span class="hint" id="email-h">For updates on this idea only. Never shown on the public queue.</span>
-        <span class="err" id="email-e">That email doesn't look complete. Check it, or leave it blank.</span></div>
-      <div class="f"><label class="chk" for="pub"><input type="checkbox" id="pub" name="public" checked aria-describedby="pub-h"><span><span class="lbl">May we list this idea publicly?</span>
-        <span class="hint" id="pub-h" style="margin-top:2px">If unchecked, only the ExoFab team sees it.</span></span></label></div>
-      <div class="actions"><button class="btn ice" type="submit">Submit idea</button><a class="tlink" href="queue.html">See the public queue</a></div>
+        <span class="hint" id="name-h">Shown on the queue when you provide it. Leave blank to stay anonymous.</span></div>
+      <div class="f hp" aria-hidden="true">
+        <label for="website">Website</label>
+        <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+      </div>
+      <div class="f" id="turnstile-wrap" hidden>
+        <div id="turnstile" data-action="submit-idea"></div>
+        <span class="err" id="turnstile-e">Complete the verification check.</span>
+      </div>
+      <div class="actions"><button class="btn ice" type="submit" id="submitBtn">Submit idea</button><a class="tlink" href="queue.html">See the public queue</a></div>
     </form>
   </div>
   <section class="panel done" id="doneView" hidden aria-labelledby="done-h" tabindex="-1">
     <svg class="gem" width="40" height="40" viewBox="0 0 22 22" aria-hidden="true"><polygon points="11,1 20,6 20,16 11,21 2,16 2,6" fill="none" stroke="#8fe0b0" stroke-width="1.2"/><circle cx="11" cy="11" r="3" fill="#f2ab6d"/></svg>
     <h2 id="done-h">Thank you. Your idea is in.</h2>
-    <p>Your queue id is <span class="qid" id="qid">idea-0042</span>. <span id="pubmsg">It now shows on the public queue as <span class="st submitted">Submitted</span>.</span></p>
-    <p>We review new ideas each week. If you left an email, we'll write when its status changes. Nothing else.</p>
-    <div class="actions"><a class="btn ice" id="qlink" href="queue.html#idea-0042">View it in the queue</a><a class="tlink" href="submit.html">Submit another idea</a></div>
-    <p class="ex" style="margin-top:var(--sp-5)">Prototype · nothing was sent</p>
+    <p>Your queue id is <span class="qid" id="qid"></span>. <span id="pubmsg">It now shows on the public queue as <span class="st submitted">Submitted</span>.</span></p>
+    <p>We review new ideas each week. Watch the queue for status changes.</p>
+    <div class="actions"><a class="btn ice" id="qlink" href="queue.html">View it in the queue</a><a class="tlink" href="submit.html">Submit another idea</a></div>
   </section>
   <p class="sr" id="live" role="status" aria-live="polite"></p>
 </div>
@@ -95,18 +99,107 @@ input[aria-invalid=true],textarea[aria-invalid=true]{border-color:var(--err)}
 
 <script>
 (()=>{const $=id=>document.getElementById(id),f=$('f');
-function done(id,pub){$('formView').hidden=true;const d=$('doneView');d.hidden=false;$('qid').textContent=id;$('qlink').href='queue.html#'+id;
- if(!pub)$('pubmsg').textContent='It is private, so only the ExoFab team will see it.';
- $('live').textContent='Idea submitted. Your queue id is '+id+'.';d.focus();}
-if(new URLSearchParams(location.search).get('done')==='1'){done('idea-0042',true);return}
-const rules=[['title',v=>v.trim().length>0],['what',v=>v.trim().length>0],['email',v=>!v||/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim())]];
-f.addEventListener('submit',e=>{e.preventDefault();const bad=[];
- rules.forEach(([id,ok])=>{const i=$(id),good=ok(i.value);i.setAttribute('aria-invalid',!good);$(id+'-e').classList.toggle('on',!good);if(!good)bad.push(id)});
- const s=$('sum');if(bad.length){$('sumList').innerHTML=bad.map(id=>`<li><a href="#${id}">${$(id+'-e').textContent}</a></li>`).join('');
-  s.querySelector('b').textContent=`Please fix ${bad.length} thing${bad.length>1?'s':''} before sending:`;s.hidden=false;s.focus();return}
- s.hidden=true;
- // STUB: POST /api/ideas — prototype makes no network call. Id is simulated.
- done('idea-0042',$('pub').checked);});
+const apiBase=(window.EXO_API_BASE||'').replace(/\/$/,'');
+const siteKey=window.EXO_TURNSTILE_SITEKEY||'';
+let turnstileToken='';
+
+function showDone(id){
+  $('formView').hidden=true;
+  const d=$('doneView');
+  d.hidden=false;
+  $('qid').textContent=id;
+  $('qlink').href='queue.html#'+id;
+  $('live').textContent='Idea submitted. Your queue id is '+id+'.';
+  d.focus();
+}
+
+function showFail(msg){
+  const s=$('sum');
+  $('sumList').innerHTML=`<li>${msg}</li>`;
+  s.querySelector('b').textContent='Your idea was not saved:';
+  s.hidden=false;
+  s.focus();
+  $('live').textContent=msg;
+}
+
+function initTurnstile(){
+  if(!siteKey||!apiBase){return;}
+  $('turnstile-wrap').hidden=false;
+  const el=$('turnstile');
+  el.setAttribute('data-sitekey',siteKey);
+  const boot=()=>{
+    if(!window.turnstile){setTimeout(boot,100);return;}
+    window.turnstile.render(el,{
+      sitekey:siteKey,
+      action:'submit-idea',
+      callback:(t)=>{turnstileToken=t;},
+      'expired-callback':()=>{turnstileToken='';},
+      'error-callback':()=>{turnstileToken='';}
+    });
+  };
+  boot();
+}
+initTurnstile();
+
+const rules=[['title',v=>v.trim().length>0],['what',v=>v.trim().length>0]];
+f.addEventListener('submit',async e=>{
+  e.preventDefault();
+  const bad=[];
+  rules.forEach(([id,ok])=>{const i=$(id),good=ok(i.value);i.setAttribute('aria-invalid',!good);$(id+'-e').classList.toggle('on',!good);if(!good)bad.push(id)});
+  const s=$('sum');
+  if(bad.length){
+    $('sumList').innerHTML=bad.map(id=>`<li><a href="#${id}">${$(id+'-e').textContent}</a></li>`).join('');
+    s.querySelector('b').textContent=`Please fix ${bad.length} thing${bad.length>1?'s':''} before sending:`;
+    s.hidden=false;s.focus();return;
+  }
+  if(!apiBase){showFail('Intake API is not configured on this site.');return;}
+  if(siteKey&&!turnstileToken){
+    $('turnstile-e').classList.add('on');
+    showFail('Complete the verification check.');
+    return;
+  }
+  $('turnstile-e').classList.remove('on');
+  s.hidden=true;
+  const btn=$('submitBtn');
+  btn.disabled=true;
+  const payload={
+    title:$('title').value,
+    what:$('what').value,
+    who:$('who').value.trim()||null,
+    name:$('name').value.trim()||null,
+    website:$('website').value,
+    public:true,
+    turnstileToken:turnstileToken||undefined
+  };
+  try{
+    const res=await fetch(`${apiBase}/api/ideas`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(payload)
+    });
+    const data=await res.json().catch(()=>({}));
+    if(res.status===422&&data.errors){
+      const msgs=Object.values(data.errors);
+      showFail(msgs[0]||'Fix the form and try again.');
+      btn.disabled=false;
+      return;
+    }
+    if(res.status===429){
+      showFail(data.error||'Too many ideas from here just now. Try again in a few minutes.');
+      btn.disabled=false;
+      return;
+    }
+    if(!res.ok||!data.id||typeof data.id!=='string'){
+      showFail(data.error||'Your idea was not saved. Try again shortly.');
+      btn.disabled=false;
+      return;
+    }
+    showDone(data.id);
+  }catch{
+    showFail('Your idea was not saved. Check your connection and try again.');
+    btn.disabled=false;
+  }
+});
 })();
 </script>
 </body>

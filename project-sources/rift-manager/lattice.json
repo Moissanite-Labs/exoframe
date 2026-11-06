@@ -1,0 +1,296 @@
+{
+  "schema": "exoframe/lattice/1",
+  "slug": "rift-manager",
+  "apiBase": "",
+  "currentStage": 4,
+  "rehearsal": {
+    "enabled": true,
+    "label": "EXOFAB / TEST DECISION REHEARSAL",
+    "copy": "The labeled test decision below exercises approve / decline / revise / revoke in your browser. Nothing is sent externally. Imported Rift history on the lattice is real sourced work; reset demo clears only rehearsal choices, never project records."
+  },
+  "project": {
+    "id": "case-rift-manager",
+    "title": "Rift Manager",
+    "subtitle": "League esports management sim",
+    "origin": "Imported existing project",
+    "imported": "Imported existing project",
+    "blurb": "League of Legends esports management sim built in ahrazzle/rift-manager with a live browser game. ExoFab did not originate this product — original idea and team formation are not recorded here.",
+    "crumbs": ["Moissanite Labs", "ExoFab", "Rift Manager"],
+    "eyebrow": "case-rift-manager / Project view · imported project",
+    "links": {
+      "working_repo": "https://github.com/ahrazzle/rift-manager",
+      "live_game": "https://www.rift.askaconsult.com/",
+      "source_branch": "https://github.com/Moissanite-Labs/exoframe/tree/project/rift-manager",
+      "design_provenance": "https://github.com/Moissanite-Labs/exofab/pull/17"
+    },
+    "snapshot_at": "2026-11-05T18:59:56-06:00",
+    "snapshot_note": "Lattice seeded from verified public GitHub merges, tags, and live game checks through PR #39 (merged after the 6:59 PM CST import snapshot). Refresh is manual until automation lands."
+  },
+  "stages": [
+    { "n": "001", "name": "Idea" },
+    { "n": "002", "name": "Shape" },
+    { "n": "003", "name": "Prototype" },
+    { "n": "004", "name": "Build" },
+    { "n": "005", "name": "Ship" }
+  ],
+  "works": [
+    {
+      "id": "0-0",
+      "stage": 0,
+      "state": "done",
+      "actor": "unknown",
+      "title": "Repository import · PR #1",
+      "label": "unknown · Repository import · PR #1",
+      "url": "https://github.com/ahrazzle/rift-manager/pull/1",
+      "hash": "rift-pr1"
+    },
+    {
+      "id": "1-0",
+      "stage": 1,
+      "state": "done",
+      "actor": "unknown",
+      "title": "Broadcast Night UI/UX · PR #11",
+      "label": "unknown · Broadcast Night UI/UX · PR #11",
+      "url": "https://github.com/ahrazzle/rift-manager/pull/11",
+      "hash": "rift-pr11"
+    },
+    {
+      "id": "1-1",
+      "stage": 1,
+      "state": "done",
+      "actor": "unknown",
+      "title": "Design tokens · PR #13",
+      "label": "unknown · Design tokens · PR #13",
+      "url": "https://github.com/ahrazzle/rift-manager/pull/13",
+      "hash": "rift-pr13"
+    },
+    {
+      "id": "2-0",
+      "stage": 2,
+      "state": "done",
+      "actor": "unknown",
+      "title": "Three-lane map · PR #22",
+      "label": "unknown · Three-lane map · PR #22",
+      "url": "https://github.com/ahrazzle/rift-manager/pull/22",
+      "hash": "rift-pr22"
+    },
+    {
+      "id": "3-0",
+      "stage": 3,
+      "state": "done",
+      "actor": "unknown",
+      "title": "Club pennant brand · PR #23",
+      "label": "unknown · Club pennant brand · PR #23",
+      "url": "https://github.com/ahrazzle/rift-manager/pull/23",
+      "hash": "rift-pr23"
+    },
+    {
+      "id": "3-1",
+      "stage": 3,
+      "state": "done",
+      "actor": "unknown",
+      "title": "Match sim layout · PR #39",
+      "label": "unknown · Match sim layout · PR #39",
+      "url": "https://github.com/ahrazzle/rift-manager/pull/39",
+      "hash": "rift-pr39"
+    },
+    {
+      "id": "4-0",
+      "stage": 4,
+      "state": "done",
+      "actor": "unknown",
+      "title": "Version 1.0.0 · PR #25",
+      "label": "unknown · Version 1.0.0 · PR #25",
+      "url": "https://github.com/ahrazzle/rift-manager/pull/25",
+      "hash": "rift-pr25"
+    },
+    {
+      "id": "4-1",
+      "stage": 4,
+      "state": "done",
+      "actor": "unknown",
+      "title": "Git tag v1.0.0",
+      "label": "unknown · Git tag v1.0.0 (no published Release)",
+      "url": "https://github.com/ahrazzle/rift-manager/tree/v1.0.0",
+      "hash": "rift-tag-v1"
+    },
+    {
+      "id": "4-2",
+      "stage": 4,
+      "state": "done",
+      "actor": "unknown",
+      "title": "Live game verified",
+      "label": "unknown · Live game at rift.askaconsult.com",
+      "url": "https://www.rift.askaconsult.com/",
+      "hash": "rift-live"
+    },
+    {
+      "id": "4-3",
+      "stage": 4,
+      "state": "done",
+      "actor": "unknown",
+      "title": "Social preview assets · PR #14",
+      "label": "unknown · Social cards · PR #14",
+      "url": "https://github.com/ahrazzle/rift-manager/pull/14",
+      "hash": "rift-pr14"
+    },
+    {
+      "id": "4-4",
+      "stage": 4,
+      "state": "done",
+      "actor": "unknown",
+      "title": "Help shape invite · PR #30",
+      "label": "unknown · Community invite UI · PR #30",
+      "url": "https://github.com/ahrazzle/rift-manager/pull/30",
+      "hash": "rift-pr30"
+    },
+    {
+      "id": "4-5",
+      "stage": 4,
+      "state": "done",
+      "actor": "unknown",
+      "title": "About / Community page · PR #35",
+      "label": "unknown · About / Community · PR #35",
+      "url": "https://github.com/ahrazzle/rift-manager/pull/35",
+      "hash": "rift-pr35"
+    },
+    {
+      "id": "4-6",
+      "stage": 4,
+      "state": "done",
+      "actor": "unknown",
+      "title": "Feedback roadmap · PR #32",
+      "label": "unknown · Roadmap from feedback · PR #32",
+      "url": "https://github.com/ahrazzle/rift-manager/pull/32",
+      "hash": "rift-pr32"
+    },
+    {
+      "id": "4-7",
+      "stage": 4,
+      "state": "forming",
+      "actor": "unknown",
+      "title": "Formal GitHub Release publication · Pending",
+      "label": "unknown · Formal Release publication · Pending",
+      "hash": "pending-release"
+    },
+    {
+      "id": "4-8",
+      "stage": 4,
+      "state": "forming",
+      "actor": "unknown",
+      "title": "Launch outcomes · Pending",
+      "label": "unknown · Launch outcomes · Pending",
+      "hash": "pending-launch"
+    },
+    {
+      "id": "4-9",
+      "stage": 4,
+      "state": "forming",
+      "actor": "unknown",
+      "title": "Promotion reach · Pending",
+      "label": "unknown · Campaign traction · Pending",
+      "hash": "pending-promo"
+    },
+    {
+      "id": "4-10",
+      "stage": 4,
+      "state": "forming",
+      "actor": "unknown",
+      "title": "Outside community activity · Pending",
+      "label": "unknown · Member activity · Pending",
+      "hash": "pending-community"
+    }
+  ],
+  "shipPending": [],
+  "crew": {
+    "roles": [
+      { "slot": "lead", "role": "Lead", "scope": "approves", "status": "pending" },
+      { "slot": "design", "role": "Interaction design", "scope": "reviews", "status": "pending" },
+      { "slot": "build", "role": "Build", "scope": "drafts", "status": "pending" },
+      { "slot": "launch", "role": "Launch coordination", "scope": "asks first", "status": "pending" },
+      { "slot": "community", "role": "Community", "scope": "reviews", "status": "pending" },
+      { "slot": "agent-research", "role": "Research agent", "scope": "drafts", "status": "pending" }
+    ]
+  },
+  "liveWork": [],
+  "trace": [
+    {
+      "node": "4-6",
+      "work": "Feedback folded into roadmap (PR #32)",
+      "time": "Nov 5",
+      "from": "from <b>player feedback</b> · authors not recorded",
+      "hash": "rift-pr32",
+      "url": "https://github.com/ahrazzle/rift-manager/pull/32"
+    },
+    {
+      "node": "3-1",
+      "work": "Match sim layout merged (PR #39)",
+      "time": "Nov 5",
+      "from": "from <b>post-snapshot import</b>",
+      "hash": "rift-pr39",
+      "url": "https://github.com/ahrazzle/rift-manager/pull/39"
+    },
+    {
+      "node": "4-2",
+      "work": "Live game verified at rift.askaconsult.com",
+      "time": "Nov 5",
+      "from": "from <b>exoframe snapshot check</b>",
+      "hash": "rift-live",
+      "url": "https://www.rift.askaconsult.com/"
+    },
+    {
+      "node": "4-1",
+      "work": "v1.0.0 tag on main (no GitHub Release yet)",
+      "time": "Nov 5",
+      "from": "from <b>PR #25 merge</b>",
+      "hash": "rift-tag-v1",
+      "url": "https://github.com/ahrazzle/rift-manager/tree/v1.0.0"
+    },
+    {
+      "node": "0-0",
+      "work": "Existing game imported to repo (PR #1)",
+      "time": "Oct 22",
+      "from": "from <b>ahrazzle/rift-manager</b> · origin not recorded on ExoFab",
+      "hash": "rift-pr1",
+      "url": "https://github.com/ahrazzle/rift-manager/pull/1"
+    }
+  ],
+  "decision": {
+    "id": "test-rift-playtest-interest",
+    "test": true,
+    "label": "Decision TEST · in-product rehearsal",
+    "status": "pending",
+    "title": "Record visitor interest in a future Rift playtest list",
+    "proposer": { "name": "ExoFab intake", "actor": "unknown", "when": "Snapshot", "build": "v1.0.0 tag" },
+    "reasoning": "This is a clearly labeled test decision for the Crystal Lattice UI. It does not email anyone, invite testers, or change the game. Approving only stores your choice when the participation API is deployed.",
+    "sources": [
+      {
+        "n": 1,
+        "node": "4-2",
+        "who": "Live deployment",
+        "kind": "record",
+        "what": "Playable game at rift.askaconsult.com",
+        "meta": "rift-live · verified Nov 5",
+        "url": "https://www.rift.askaconsult.com/"
+      },
+      {
+        "n": 2,
+        "node": "4-4",
+        "who": "Community prep",
+        "kind": "record",
+        "what": "Help-shape invite merged (PR #30)",
+        "meta": "rift-pr30 · no member counts recorded",
+        "url": "https://github.com/ahrazzle/rift-manager/pull/30"
+      }
+    ],
+    "consequences": [
+      { "dt": "In this scenario", "dd": "Your approval would add a <span>pending interest record</span> only." },
+      { "dt": "Data shared", "dd": "Display name if provided · <span>no email collected in v0</span>." },
+      { "dt": "How to undo", "dd": "Revoke in this panel · <span>nothing was sent outbound</span>." }
+    ],
+    "principle": {
+      "quote": "Learning a preference does not grant permission.",
+      "note": "Past approvals on this test decision do not authorize outbound mail or invites."
+    }
+  }
+}

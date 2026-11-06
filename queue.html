@@ -51,7 +51,7 @@ h1{font-weight:500;font-size:clamp(30px,6vw,42px);letter-spacing:-.03em;line-hei
   <div class="filters" role="group" aria-label="Filter by status" id="filters"></div>
   <p class="status-line" id="count" role="status" aria-live="polite"></p>
   <ul class="list" id="list"></ul>
-  <p class="ex" style="margin-top:var(--sp-5)">Example data · prototype reads data/ideas.json (inlined below for file:// use)</p>
+  <p class="ex" style="margin-top:var(--sp-5)">Queue reads committed <code>data/ideas.json</code> (regenerated from GitHub issues when intake sync runs). Example-only rows stay labeled in that file.</p>
 </div>
 </main>
 <footer class="foot"><div class="wrap">
@@ -59,13 +59,24 @@ h1{font-weight:500;font-size:clamp(30px,6vw,42px);letter-spacing:-.03em;line-hei
   <p>We build in the open, with the people we build for.</p>
 </div></footer>
 
-<script type="application/json" id="seed">{"example":true,"ideas":[{"id":"case-rift-manager","title":"Rift Manager","blurb":"LoL esports management sim with a live public repo and playable deployment \u2014 exoframe PoC case study (not built by ExoFab).","status":"shipped","stage":4,"opened":"2026-10-22","synbios_url":null,"submitter":null},{"id":"idea-0042","title":"Harbor Light (archived simulation)","blurb":"Retired fictional example only \u2014 tide/ferry board simulation, not a real built result.","status":"building","stage":2,"opened":"2026-10-28","synbios_url":null,"submitter":"Rosa"},{"id":"idea-0041","title":"Seed library check-out","blurb":"Let a neighbourhood seed library track what's borrowed and what came back.","status":"submitted","stage":0,"opened":"2026-11-03","synbios_url":null,"submitter":null},{"id":"idea-0040","title":"Shelter bed count","blurb":"One page that shows open beds at local shelters tonight, updated by staff.","status":"accepted","stage":1,"opened":"2026-11-01","synbios_url":null,"submitter":"Marcus"},{"id":"idea-0039","title":"Choir part trainer","blurb":"Play just your voice part of a piece, slowed down, so you can practise at home.","status":"submitted","stage":0,"opened":"2026-10-30","synbios_url":null,"submitter":null},{"id":"idea-0037","title":"Bike-repair queue","blurb":"A sign-up line for a volunteer bike workshop so nobody waits in the cold.","status":"building","stage":3,"opened":"2026-10-21","synbios_url":null,"submitter":"Jun"},{"id":"idea-0034","title":"Allotment water rota","blurb":"Shared watering rota for an allotment with reminders and swaps.","status":"shipped","stage":4,"opened":"2026-10-12","synbios_url":null,"submitter":"Priya"},{"id":"idea-0031","title":"Library hold notifier","blurb":"A text when a reserved book is ready, for people without smartphones.","status":"shipped","stage":4,"opened":"2026-10-05","synbios_url":null,"submitter":null}]}</script>
+<script type="application/json" id="seed">{"example":true,"ideas":[]}</script>
 <script>
 (()=>{const $=id=>document.getElementById(id);
-// STUB: production reads GET /api/ideas; until wired, data/ideas.json. Prototype inlines it to avoid any network call.
-const ideas=JSON.parse($('seed').textContent).ideas.sort((a,b)=>b.opened.localeCompare(a.opened));
+let ideas=[];
 let projectByIdea={};
-fetch('data/projects.json').then(r=>r.json()).then(d=>{(d.projects||[]).forEach(p=>{if(p.idea_id)projectByIdea[p.idea_id]=p.slug});render()}).catch(()=>render());
+const seedFallback=()=>{try{return JSON.parse($('seed').textContent).ideas||[]}catch(e){return []}};
+async function loadIdeas(){
+ try{
+  const r=await fetch('data/ideas.json',{cache:'no-store'});
+  if(!r.ok) throw new Error('ideas fetch');
+  const d=await r.json();
+  ideas=(d.ideas||[]).slice().sort((a,b)=>String(b.opened).localeCompare(String(a.opened)));
+ }catch(e){
+  ideas=seedFallback().sort((a,b)=>b.opened.localeCompare(a.opened));
+ }
+}
+fetch('data/projects.json').then(r=>r.json()).then(d=>{(d.projects||[]).forEach(p=>{if(p.idea_id)projectByIdea[p.idea_id]=p.slug});}).catch(()=>{});
+loadIdeas().then(()=>render());
 const F=[['all','All'],['submitted','Submitted'],['accepted','Accepted'],['building','Building'],['shipped','Shipped']];
 const label={submitted:'Submitted',accepted:'Accepted',building:'Building',shipped:'Shipped'};
 const stageName=['Idea','Shape','Prototype','Build','Ship'];

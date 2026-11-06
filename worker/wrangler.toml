@@ -1,0 +1,21 @@
+name = "exoframe-intake"
+main = "src/index.js"
+compatibility_date = "2025-04-01"
+
+# Secrets (set via `wrangler secret put`; never commit values):
+#   GH_ISSUES_TOKEN — GitHub PAT or fine-grained token with issues:write on Moissanite-Labs/exoframe
+#   TURNSTILE_SECRET — Cloudflare Turnstile secret key for siteverify
+
+[vars]
+TURNSTILE_HOSTNAME = "moissanite-labs.github.io"
+TURNSTILE_ACTION = "submit-idea"
+GITHUB_REPO = "Moissanite-Labs/exoframe"
+
+[[kv_namespaces]]
+binding = "IDEAS_KV"
+id = "00000000000000000000000000000000"
+
+[[ratelimits]]
+name = "INTAKE_RL"
+namespace_id = "1001"
+simple = { limit = 5, period = 60 }

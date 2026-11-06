@@ -39,6 +39,28 @@ class AggregateRegression(unittest.TestCase):
         with self.assertRaises(SystemExit):
             agg.validate_activity(bad, "harbor-light")
 
+    def test_validates_lattice_work_actor(self) -> None:
+        lattice = {
+            "slug": "rift-manager",
+            "works": [{"id": "0-0", "stage": 0, "state": "done", "actor": "bogus", "title": "x"}],
+        }
+        with self.assertRaises(SystemExit):
+            agg.validate_lattice(lattice, "rift-manager")
+
+    def test_crystal_page_includes_lattice_script(self) -> None:
+        lat_path = ROOT / "project-sources" / "rift-manager" / "lattice.json"
+        if not lat_path.is_file():
+            self.skipTest("rift lattice.json missing")
+        manifest = agg.validate_manifest(
+            agg.load_json(ROOT / "project-sources" / "rift-manager" / "manifest.json"),
+            "rift-manager",
+        )
+        lattice = agg.validate_lattice(agg.load_json(lat_path), "rift-manager")
+        html = agg.render_crystal_project_page(manifest, lattice)
+        self.assertIn("exo-lattice-data", html)
+        self.assertIn("crystal-lattice.js", html)
+        self.assertIn("The crystal", html)
+
     def test_rejects_bad_manifest_status(self) -> None:
         manifest = {
             "slug": "harbor-light",
@@ -108,9 +130,23 @@ class AggregateRegression(unittest.TestCase):
         )
         self.assertEqual(proc.returncode, 0, proc.stderr)
         html = (ROOT / "projects/rift-manager/index.html").read_text(encoding="utf-8")
-        self.assertIn("Live game verified at rift.askaconsult.com", html)
-        self.assertIn("Nov 5, 2026 · 6:59 PM CST", html)
-        self.assertNotIn("18:59 UTC", html)
+        self.assertIn("exo-lattice-data", html)
+        self.assertIn("The crystal", html)
+        self.assertIn("Imported existing project", html)
+
+    def test_crystal_reset_clears_rehearsal_storage(self) -> None:
+        src = (ROOT / "assets" / "crystal-lattice.js").read_text(encoding="utf-8")
+        self.assertIn("clearLocalParticipation", src)
+        self.assertIn("clearRehearsalParticipation", src)
+        self.assertIn('method: "DELETE"', src)
+        self.assertNotIn('reset.addEventListener("click", () => location.reload())', src)
+
+    def test_crystal_restore_includes_revoke_control(self) -> None:
+        src = (ROOT / "assets" / "crystal-lattice.js").read_text(encoding="utf-8")
+        idx = src.index("function reflectPersistedDecisionUI")
+        block = src[idx : idx + 2800]
+        self.assertIn('id="revoke"', block)
+        self.assertIn("Revoke approval", block)
 
 
 if __name__ == "__main__":

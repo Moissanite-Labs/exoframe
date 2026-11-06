@@ -44,6 +44,7 @@ STATUS_LABELS = {
 
 WRITABLE_TOP = frozenset({"projects", "data"})
 PROJECTS_JSON = ROOT / "data" / "projects.json"
+LATTICE_SHELL = ROOT / "assets" / "crystal-page-shell.html"
 
 
 def esc(text: object) -> str:
@@ -186,11 +187,122 @@ def validate_activity(activity: object, slug: str) -> list:
     return activity
 
 
-def input_fingerprint(manifest_path: Path, activity_path: Path) -> str:
+def validate_lattice(lattice: object, slug: str) -> dict:
+    if not isinstance(lattice, dict):
+        raise SystemExit(f"{slug}: lattice.json must be an object")
+    if lattice.get("slug") and lattice["slug"] != slug:
+        raise SystemExit(f"{slug}: lattice slug mismatch")
+    lattice = dict(lattice)
+    lattice.setdefault("slug", slug)
+    if not isinstance(lattice.get("works"), list):
+        raise SystemExit(f"{slug}: lattice works must be an array")
+    for i, w in enumerate(lattice["works"]):
+        if not isinstance(w, dict):
+            raise SystemExit(f"{slug}: works[{i}] must be object")
+        if w.get("actor") not in ACTOR_KINDS:
+            raise SystemExit(f"{slug}: works[{i}] invalid actor")
+        st = w.get("state")
+        if st not in ("done", "pending", "forming", "ghost"):
+            raise SystemExit(f"{slug}: works[{i}] invalid state")
+    return lattice
+
+
+def render_crystal_project_page(manifest: dict, lattice: dict) -> str:
+    slug = manifest["slug"]
+    title = manifest["title"]
+    blurb = manifest["blurb"]
+    if not LATTICE_SHELL.is_file():
+        raise SystemExit("missing assets/crystal-page-shell.html")
+    shell = LATTICE_SHELL.read_text(encoding="utf-8")
+    payload = dict(lattice)
+    payload["slug"] = slug
+    proj = dict(payload.get("project") or {})
+    proj.setdefault("title", title)
+    proj.setdefault("blurb", blurb)
+    proj.setdefault("id", manifest.get("idea_id", slug))
+    links = dict(proj.get("links") or {})
+    links.setdefault("working_repo", manifest.get("working_repo"))
+    if manifest.get("live_url"):
+        links.setdefault("live_game", manifest.get("live_url"))
+    links.setdefault(
+        "source_branch",
+        f"https://github.com/Moissanite-Labs/exoframe/tree/project/{slug}",
+    )
+    proj["links"] = links
+    snap = manifest.get("snapshot_at")
+    lat_proj = lattice.get("project", {}) or {}
+    snap_note = lat_proj.get("snapshot_note") or manifest.get("snapshot_note") or ""
+    notice = ""
+    if manifest.get("case_study"):
+        notice = (
+            f'<p class="notice ex-banner wrap" role="status" style="margin:0 auto;max-width:1440px;padding:12px 24px 0">'
+            f"PoC case study · external project · {esc(snap_note)}</p>"
+        )
+    footer = (
+        '<span>Exoframe · Crystal Lattice project view · imported work stays attributed to its sources · '
+        "pending panels are honest gaps, not fiction</span>"
+        '<em>Different minds. Shared possibility.</em> '
+        '<a href="https://github.com/Moissanite-Labs/exofab/pull/17">Design provenance: Crystal Lattice, PR #17</a>'
+    )
+    proj["footer"] = footer
+    payload["project"] = proj
+    payload["currentStage"] = int(
+        payload.get("currentStage", manifest.get("stage", 0))
+    )
+    lattice_json = json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
+    return f"""<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{esc(title)} · ExoFab project</title>
+<meta name="description" content="{esc(blurb)}">
+<meta name="theme-color" content="#08090a">
+<link rel="icon" href="../../assets/mark.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../tokens.css">
+<link rel="stylesheet" href="../../assets/crystal-lattice.css">
+<style>
+.exo-site-nav{{border-bottom:1px solid var(--line)}}
+.exo-site-nav .wrap{{display:flex;align-items:center;gap:var(--sp-4);padding:10px var(--sp-6)}}
+.exo-site-nav .brand{{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-decoration:none;color:var(--tx)}}
+.exo-site-nav .chip{{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;border:1px dashed var(--line-2);color:var(--tx2);padding:3px 8px;border-radius:999px}}
+.exo-site-nav nav{{margin-left:auto;display:flex;gap:12px;font-size:14px}}
+.exo-site-nav a{{color:var(--tx2);text-decoration:none}}
+.notice.ex-banner{{color:var(--tx2);font-size:14px}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="exo-site-nav"><div class="wrap">
+  <a class="brand" href="../../index.html"><img src="../../assets/mark.svg" width="22" height="22" alt="">EXOFAB</a>
+  <span class="chip">public project</span>
+  <nav aria-label="Primary"><a href="../../submit.html">Submit</a><a href="../../queue.html">Queue</a></nav>
+</div></header>
+{notice}
+<main id="main">
+<div id="exo-crystal-root">
+{shell}
+</div>
+<script type="application/json" id="exo-lattice-data">{lattice_json}</script>
+<script src="../../assets/config.js"></script>
+<script src="../../assets/crystal-lattice.js"></script>
+</main>
+<p class="sr"><a href="../../queue.html#{esc(manifest.get("idea_id", ""))}">Back to queue</a></p>
+</body>
+</html>
+"""
+
+
+def input_fingerprint(
+    manifest_path: Path, activity_path: Path, lattice_path: Path | None = None
+) -> str:
     h = hashlib.sha256()
     h.update(manifest_path.read_bytes())
     h.update(b"\0")
     h.update(activity_path.read_bytes())
+    if lattice_path is not None and lattice_path.is_file():
+        h.update(b"\0")
+        h.update(lattice_path.read_bytes())
     return h.hexdigest()
 
 
@@ -310,14 +422,11 @@ def render_project_page(manifest: dict, activity: list) -> str:
     gap_note = ""
     if case_study:
         banner = '<p class="notice ex-banner" role="status">PoC case study · external project</p>'
-        snap_line = ""
-        if snapshot_at:
-            snap_line = f"Snapshot as of {esc(fmt_snapshot_chicago(snapshot_at))} (America/Chicago). "
         note = snapshot_note or (
             "Activity is refreshed manually from public GitHub; not a live Synbios feed."
         )
         gap_note = (
-            f'<p class="gap-note">{snap_line}{esc(note)} '
+            f'<p class="gap-note">{esc(note)} '
             "ExoFab did not originate this game — it is built and maintained in "
             f'<a href="{esc(working_repo)}">ahrazzle/rift-manager</a>. '
             "exoframe showcases the public repo and live deployment as a proof-of-concept project page.</p>"
@@ -468,7 +577,7 @@ def safe_write(path: Path, content: str) -> bool:
         if len(parts) < 3:
             raise SystemExit(f"invalid projects write path: {rel}")
         assert_safe_slug(parts[1])
-        if parts[2] not in ("index.html", "activity.json", ".source-sha256"):
+        if parts[2] not in ("index.html", "activity.json", "lattice.json", ".source-sha256"):
             raise SystemExit(f"invalid projects artifact: {rel}")
     elif parts[0] == "data":
         if rel != PROJECTS_JSON.relative_to(ROOT):
@@ -495,7 +604,11 @@ def aggregate(force: bool = False) -> bool:
 
         manifest = validate_manifest(load_json(manifest_path), slug)
         activity = validate_activity(load_json(activity_path), slug)
-        fingerprint = input_fingerprint(manifest_path, activity_path)
+        lattice_path = src / "lattice.json"
+        lattice = None
+        if lattice_path.is_file():
+            lattice = validate_lattice(load_json(lattice_path), slug)
+        fingerprint = input_fingerprint(manifest_path, activity_path, lattice_path)
         out_dir = resolve_output_dir(slug)
 
         if outputs_up_to_date(out_dir, fingerprint, force):
@@ -513,7 +626,10 @@ def aggregate(force: bool = False) -> bool:
             )
             continue
 
-        page_html = render_project_page(manifest, activity)
+        if lattice:
+            page_html = render_crystal_project_page(manifest, lattice)
+        else:
+            page_html = render_project_page(manifest, activity)
         if safe_write(out_dir / "index.html", page_html):
             changed = True
             print(f"wrote projects/{slug}/index.html")
@@ -521,6 +637,11 @@ def aggregate(force: bool = False) -> bool:
         act_text = json.dumps(activity, indent=2) + "\n"
         if safe_write(out_dir / "activity.json", act_text):
             changed = True
+
+        if lattice:
+            lat_text = json.dumps(lattice, indent=2) + "\n"
+            if safe_write(out_dir / "lattice.json", lat_text):
+                changed = True
 
         if safe_write(out_dir / ".source-sha256", fingerprint + "\n"):
             changed = True

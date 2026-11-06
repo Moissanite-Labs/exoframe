@@ -1,0 +1,14 @@
+{
+  "name": "exoframe-intake-worker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "dev": "wrangler dev"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.8.71",
+    "vitest": "~3.0.0",
+    "wrangler": "^4.14.0"
+  }
+}

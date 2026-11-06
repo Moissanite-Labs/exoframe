@@ -1,0 +1,100 @@
+name: Sync ideas from GitHub issues
+
+on:
+  issues:
+    types: [labeled, edited]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: read
+
+jobs:
+  sync:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.action == 'edited' ||
+      (github.event.action == 'labeled' && github.event.label.name == 'intake:listed')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Regenerate data/ideas.json from open intake issues
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            const STATUS_LABELS = {
+              'intake:submitted': 'submitted',
+              'intake:accepted': 'accepted',
+              'intake:building': 'building',
+              'intake:shipped': 'shipped',
+            };
+            const STAGE_BY_STATUS = {
+              submitted: 0,
+              accepted: 1,
+              building: 2,
+              shipped: 4,
+            };
+
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'intake:public',
+              per_page: 100,
+            });
+
+            const ideas = issues
+              .filter((issue) => !issue.pull_request)
+              .map((issue) => {
+                const labels = issue.labels.map((l) =>
+                  typeof l === 'string' ? l : l.name,
+                );
+                let status = 'submitted';
+                for (const [label, st] of Object.entries(STATUS_LABELS)) {
+                  if (labels.includes(label)) status = st;
+                }
+                const stage = STAGE_BY_STATUS[status] ?? 0;
+                const blurb =
+                  (issue.body || '')
+                    .split('\n')
+                    .find((line) => line.trim() && !line.startsWith('#')) ||
+                  issue.title;
+                const opened = issue.created_at.slice(0, 10);
+                const id = `idea-${String(issue.number).padStart(4, '0')}`;
+                return {
+                  id,
+                  title: issue.title.replace(/^\[intake\]\s*/i, ''),
+                  blurb: blurb.slice(0, 280),
+                  status,
+                  stage,
+                  opened,
+                  synbios_url: null,
+                  submitter: null,
+                };
+              })
+              .sort((a, b) => (a.opened < b.opened ? 1 : -1));
+
+            const out = {
+              example: false,
+              ideas,
+              _synced_at: new Date().toISOString(),
+            };
+
+            const target = path.join(process.cwd(), 'data', 'ideas.json');
+            fs.writeFileSync(target, JSON.stringify(out, null, 2) + '\n');
+
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet data/ideas.json; then
+            echo "No changes to data/ideas.json"
+            exit 0
+          fi
+          git add data/ideas.json
+          git commit -m "[intake-sync] Refresh public queue from open intake issues"
+          git push
