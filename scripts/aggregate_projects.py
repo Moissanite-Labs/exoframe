@@ -214,24 +214,31 @@ def fmt_date(iso_date: str) -> str:
     return date(int(y), int(m), int(d)).strftime("%b %d, %Y")
 
 
-def fmt_activity_at(iso: str) -> str:
-    if "T" not in iso:
-        return fmt_date(iso)
-    from datetime import datetime
-
-    dt = datetime.fromisoformat(iso.replace("Z", "+00:00"))
-    return dt.strftime("%b %d, %Y · %H:%M UTC")
-
-
-def fmt_snapshot_chicago(iso: str) -> str:
+def parse_iso_datetime(iso: str):
     from datetime import datetime
     from zoneinfo import ZoneInfo
 
     dt = datetime.fromisoformat(iso.replace("Z", "+00:00"))
     if dt.tzinfo is None:
         dt = dt.replace(tzinfo=ZoneInfo("UTC"))
-    local = dt.astimezone(ZoneInfo("America/Chicago"))
+    return dt
+
+
+def fmt_chicago_wall(iso: str) -> str:
+    from zoneinfo import ZoneInfo
+
+    local = parse_iso_datetime(iso).astimezone(ZoneInfo("America/Chicago"))
     return local.strftime("%b %d, %Y · %I:%M %p %Z").replace(" 0", " ")
+
+
+def fmt_activity_at(iso: str) -> str:
+    if "T" not in iso:
+        return fmt_date(iso)
+    return fmt_chicago_wall(iso)
+
+
+def fmt_snapshot_chicago(iso: str) -> str:
+    return fmt_chicago_wall(iso)
 
 
 def actor_mark(actor: str) -> str:

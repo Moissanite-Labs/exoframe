@@ -5,7 +5,7 @@ Recorded on the PR branch after pushing **`project/rift-manager`** (JSON-only br
 | Item | Value |
 |------|--------|
 | Branch | `project/rift-manager` |
-| Branch tip SHA | `2c3333271d47708cc18bb88ec945abcd2e92ffd3` |
+| Branch tip SHA | `8097442030771a965b64f30b49c75d117ff44c1a` |
 | Import allowlist | `scripts/import_project_branch.py` → `harbor-light`, `rift-manager` |
 | CI publish | Actions → **Aggregate project pages** → `workflow_dispatch` on **`main`** only → import slug `rift-manager` (workflow choice already on `main`; merge PR before using production workflow) |
 
