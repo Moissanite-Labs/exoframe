@@ -1,0 +1,15 @@
+{
+  "slug": "rift-manager",
+  "title": "Rift Manager",
+  "idea_id": "case-rift-manager",
+  "status": "shipped",
+  "stage": 4,
+  "blurb": "League of Legends esports management sim: build your roster, coach your team, and chase regional and world titles. Built in the public ahrazzle/rift-manager repo with a live browser game — showcased here as exoframe’s real PoC case study (ExoFab did not originate this game).",
+  "working_repo": "https://github.com/ahrazzle/rift-manager",
+  "live_url": "https://www.rift.askaconsult.com/",
+  "opened": "2026-10-22",
+  "case_study": true,
+  "example": false,
+  "snapshot_at": "2026-11-05T18:59:56-06:00",
+  "snapshot_note": "Activity below was copied manually from public GitHub merges and tags; refresh is manual — not a live Synbios feed."
+}
