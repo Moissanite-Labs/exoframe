@@ -23,8 +23,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Fetch allowlisted project branch for import test
-        run: git fetch --depth=1 origin project/harbor-light || true
+      - name: Fetch allowlisted project branches for import test
+        run: |
+          git fetch --depth=1 origin project/harbor-light || true
+          git fetch --depth=1 origin project/rift-manager || true
 
       - name: Run aggregation regression harness
         run: python3 scripts/test_aggregate_regression.py

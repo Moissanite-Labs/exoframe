@@ -2,6 +2,15 @@
   "example": true,
   "projects": [
     {
+      "slug": "rift-manager",
+      "idea_id": "case-rift-manager",
+      "title": "Rift Manager",
+      "status": "shipped",
+      "stage": 4,
+      "example": false,
+      "opened": "2026-10-22"
+    },
+    {
       "slug": "harbor-light",
       "idea_id": "idea-0042",
       "title": "Harbor Light",

@@ -16,7 +16,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCES = Path(
     __import__("os").environ.get("EXOFRAME_PROJECT_SOURCES", str(ROOT / "project-sources"))
 ).resolve()
-ALLOWLIST = frozenset({"harbor-light"})
+ALLOWLIST = frozenset({"harbor-light", "rift-manager"})
 SLUG_RE = re.compile(r"^[a-z0-9][a-z0-9-]{0,62}$")
 STATUSES = frozenset({"submitted", "accepted", "building", "shipped"})
 ALLOWED_URL_HOSTS = (
@@ -25,12 +25,14 @@ ALLOWED_URL_HOSTS = (
     "raw.githubusercontent.com",
 )
 ALLOWED_URL_PATH_PREFIXES = (
-    "/Moissanite-Labs/exoframe/",
-    "/Moissanite-Labs/exofab/",
+    "/Moissanite-Labs/exoframe",
+    "/Moissanite-Labs/exofab",
+    "/ahrazzle/rift-manager",
 )
+LIVE_GAME_HOSTS = frozenset({"www.rift.askaconsult.com", "rift.askaconsult.com"})
 
 SYNBIOS_STUBS = frozenset({"#synbios-placeholder"})
-ACTOR_KINDS = frozenset({"human", "agent"})
+ACTOR_KINDS = frozenset({"human", "agent", "unknown"})
 ACTIVITY_LINK_PREFIXES = ("../../", "https://")
 STAGE_NAMES = ("Idea", "Shape", "Prototype", "Build", "Ship")
 STATUS_LABELS = {
@@ -78,17 +80,23 @@ def load_json(path: Path) -> object:
         return json.load(f)
 
 
-def validate_working_repo(url: str) -> str:
+def validate_https_repo_or_live(url: str, field: str) -> str:
     parsed = urlparse(url)
     if parsed.scheme != "https":
-        raise SystemExit(f"working_repo must be https: {url}")
+        raise SystemExit(f"{field} must be https: {url}")
     host = (parsed.hostname or "").lower()
+    if host in LIVE_GAME_HOSTS:
+        return url
     if host not in ALLOWED_URL_HOSTS:
-        raise SystemExit(f"working_repo host not allowlisted: {host}")
+        raise SystemExit(f"{field} host not allowlisted: {host}")
     path = parsed.path or ""
-    if not any(path.startswith(prefix) for prefix in ALLOWED_URL_PATH_PREFIXES):
-        raise SystemExit(f"working_repo path not allowlisted: {path}")
+    if not any(path == p or path.startswith(p + "/") for p in ALLOWED_URL_PATH_PREFIXES):
+        raise SystemExit(f"{field} path not allowlisted: {path}")
     return url
+
+
+def validate_working_repo(url: str) -> str:
+    return validate_https_repo_or_live(url, "working_repo")
 
 
 def validate_public_href(url: str, field: str) -> str:
@@ -98,7 +106,7 @@ def validate_public_href(url: str, field: str) -> str:
         if ".." in url[6:] or url.startswith("../../.."):
             raise SystemExit(f"{field}: invalid relative link")
         return url
-    return validate_working_repo(url)
+    return validate_https_repo_or_live(url, field)
 
 
 def normalize_synbios_url(value: object, field: str) -> str | None:
@@ -133,6 +141,21 @@ def validate_manifest(manifest: object, slug: str) -> dict:
     manifest = dict(manifest)
     manifest["working_repo"] = validate_working_repo(str(manifest["working_repo"]))
     manifest["synbios_url"] = normalize_synbios_url(manifest.get("synbios_url"), f"{slug}: synbios_url")
+    live_url = manifest.get("live_url")
+    if live_url is not None:
+        if not isinstance(live_url, str) or not live_url.strip():
+            raise SystemExit(f"{slug}: invalid live_url")
+        manifest["live_url"] = validate_https_repo_or_live(live_url.strip(), f"{slug}: live_url")
+    snapshot_at = manifest.get("snapshot_at")
+    if snapshot_at is not None and (not isinstance(snapshot_at, str) or not snapshot_at.strip()):
+        raise SystemExit(f"{slug}: invalid snapshot_at")
+    snapshot_note = manifest.get("snapshot_note")
+    if snapshot_note is not None and (not isinstance(snapshot_note, str) or not snapshot_note.strip()):
+        raise SystemExit(f"{slug}: invalid snapshot_note")
+    for flag in ("example", "case_study", "archived"):
+        val = manifest.get(flag, False)
+        if val is not True and val is not False:
+            raise SystemExit(f"{slug}: {flag} must be boolean")
     submitter = manifest.get("submitter")
     if submitter is not None and (not isinstance(submitter, str) or not submitter.strip()):
         raise SystemExit(f"{slug}: invalid submitter")
@@ -191,18 +214,40 @@ def fmt_date(iso_date: str) -> str:
     return date(int(y), int(m), int(d)).strftime("%b %d, %Y")
 
 
+def parse_iso_datetime(iso: str):
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+
+    dt = datetime.fromisoformat(iso.replace("Z", "+00:00"))
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=ZoneInfo("UTC"))
+    return dt
+
+
+def fmt_chicago_wall(iso: str) -> str:
+    from zoneinfo import ZoneInfo
+
+    local = parse_iso_datetime(iso).astimezone(ZoneInfo("America/Chicago"))
+    return local.strftime("%b %d, %Y · %I:%M %p %Z").replace(" 0", " ")
+
+
 def fmt_activity_at(iso: str) -> str:
     if "T" not in iso:
         return fmt_date(iso)
-    from datetime import datetime
+    return fmt_chicago_wall(iso)
 
-    dt = datetime.fromisoformat(iso.replace("Z", "+00:00"))
-    return dt.strftime("%b %d, %Y · %H:%M UTC")
+
+def fmt_snapshot_chicago(iso: str) -> str:
+    return fmt_chicago_wall(iso)
 
 
 def actor_mark(actor: str) -> str:
-    kind = "Person" if actor == "human" else "Agent"
-    shape = "human" if actor == "human" else "agent"
+    if actor == "human":
+        kind, shape = "Person", "human"
+    elif actor == "agent":
+        kind, shape = "Agent", "agent"
+    else:
+        kind, shape = "Account", "unknown"
     return (
         f'<span class="act-mark {shape}" aria-hidden="true"></span>'
         f'<span class="sr">{kind}</span>'
@@ -253,12 +298,39 @@ def render_project_page(manifest: dict, activity: list) -> str:
     opened = manifest.get("opened", "")
     submitter = manifest.get("submitter")
     example = manifest.get("example", False)
+    case_study = manifest.get("case_study", False)
+    archived = manifest.get("archived", False)
+    live_url = manifest.get("live_url")
+    snapshot_at = manifest.get("snapshot_at")
+    snapshot_note = manifest.get("snapshot_note")
 
     status_label = STATUS_LABELS.get(status, status.title())
 
     banner = ""
     gap_note = ""
-    if example:
+    if case_study:
+        banner = '<p class="notice ex-banner" role="status">PoC case study · external project</p>'
+        snap_line = ""
+        if snapshot_at:
+            snap_line = f"Snapshot as of {esc(fmt_snapshot_chicago(snapshot_at))} (America/Chicago). "
+        note = snapshot_note or (
+            "Activity is refreshed manually from public GitHub; not a live Synbios feed."
+        )
+        gap_note = (
+            f'<p class="gap-note">{snap_line}{esc(note)} '
+            "ExoFab did not originate this game — it is built and maintained in "
+            f'<a href="{esc(working_repo)}">ahrazzle/rift-manager</a>. '
+            "exoframe showcases the public repo and live deployment as a proof-of-concept project page.</p>"
+        )
+    elif example and archived:
+        banner = '<p class="notice ex-banner" role="status">Archived · example simulation</p>'
+        gap_note = (
+            '<p class="gap-note">Retired fictional example. Status and activity are simulation only — '
+            "no delivered artifact. The linked <code>work/harbor-light</code> branch is a stand-in, "
+            "not proof of a built result. See the "
+            '<a href="../rift-manager/">Rift Manager case study</a> for a real public project.</p>'
+        )
+    elif example:
         banner = '<p class="notice ex-banner" role="status">Example project · simulation</p>'
         gap_note = (
             '<p class="gap-note">Status and activity only. No separate working repo yet; '
@@ -282,6 +354,11 @@ def render_project_page(manifest: dict, activity: list) -> str:
             f'<a class="btn ice" href="{esc(working_repo)}" rel="noopener noreferrer" '
             f'target="_blank">Open working repo<span class="sr"> for {esc(title)}</span> →</a>'
         )
+        if live_url and isinstance(live_url, str) and live_url.startswith("https://"):
+            actions += (
+                f' <a class="btn sm" href="{esc(live_url)}" rel="noopener noreferrer" '
+                f'target="_blank">Play live game<span class="sr"> for {esc(title)}</span> →</a>'
+            )
         if synbios_url and synbios_url.startswith("https://") and synbios_url != working_repo:
             syn_label = (
                 "See how it was built" if status == "shipped" else "Building in Synbios"
@@ -326,6 +403,7 @@ h1{{font-weight:500;font-size:clamp(30px,6vw,42px);letter-spacing:-.03em;line-he
 .act-mark{{display:inline-block;width:10px;height:10px;flex:0 0 auto}}
 .act-mark.human{{border-radius:50%;border:1.5px solid var(--carbon);background:var(--carbon-dim)}}
 .act-mark.agent{{background:var(--silicon);transform:rotate(45deg) scale(.85)}}
+.act-mark.unknown{{border-radius:2px;border:1px solid var(--tx3);background:var(--s2)}}
 .act-link{{font-size:14px;min-height:44px;display:inline-flex;align-items:center}}
 .act-pending{{border-color:#e9f4ff55}}
 .act-pending-note{{margin:8px 0 0;font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--ice);text-transform:uppercase}}
@@ -407,7 +485,7 @@ def aggregate(force: bool = False) -> bool:
     changed = False
     projects_out: list[dict] = []
 
-    for slug in sorted(ALLOWLIST):
+    for slug in sorted(ALLOWLIST, key=lambda s: (0 if s == "rift-manager" else 1, s)):
         src = resolve_source_dir(slug)
         manifest_path = src / "manifest.json"
         activity_path = src / "activity.json"
