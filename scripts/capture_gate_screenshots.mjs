@@ -90,6 +90,8 @@ if (await approve.count()) {
   );
   await page.reload({ waitUntil: "networkidle" });
   await page.waitForSelector(".pill.signed", { timeout: 8000 });
+  await page.waitForSelector("#revoke", { timeout: 8000 });
+  await page.locator("#decision").scrollIntoViewIfNeeded();
   await page.screenshot({
     path: join(artifactOut, "rift-decision-approved-reload-390.png"),
     fullPage: false,
@@ -99,6 +101,42 @@ if (await approve.count()) {
     join(repoOut, "rift-decision-approved-reload-390.png"),
   );
 }
+
+await page.setViewportSize({ width: 390, height: 844 });
+await page.goto(`${base}/projects/rift-manager/`, { waitUntil: "networkidle" });
+await page.evaluate(() => localStorage.removeItem("exoframe-participation:rift-manager"));
+await page.reload({ waitUntil: "networkidle" });
+await page.locator("[data-exo-role-form] button[type='submit']").click();
+await waitRoleStatus(page);
+await page.goto(`${base}/projects/rift-manager/#decision`, { waitUntil: "networkidle" });
+await page.locator("#approve").click();
+await page.waitForSelector("#sigline.signed", { timeout: 15000 });
+await page.screenshot({
+  path: join(artifactOut, "rift-rehearsal-before-reset-390.png"),
+  fullPage: true,
+});
+await copyFile(
+  join(artifactOut, "rift-rehearsal-before-reset-390.png"),
+  join(repoOut, "rift-rehearsal-before-reset-390.png"),
+);
+await page.locator("#demoReset").click();
+await page.waitForLoadState("networkidle");
+await page.waitForFunction(
+  () => {
+    const el = document.querySelector("[data-exo-role-status]");
+    const signed = document.querySelector("#sigline.signed");
+    return (!el || el.hidden) && !signed;
+  },
+  { timeout: 15000 },
+);
+await page.screenshot({
+  path: join(artifactOut, "rift-rehearsal-after-reset-390.png"),
+  fullPage: true,
+});
+await copyFile(
+  join(artifactOut, "rift-rehearsal-after-reset-390.png"),
+  join(repoOut, "rift-rehearsal-after-reset-390.png"),
+);
 
 await shot("rift-lattice-1440.png", `${base}/projects/rift-manager/#demo-start`, 1440, 900);
 await shot("submit-form-390.png", `${base}/submit.html`, 390, 844);

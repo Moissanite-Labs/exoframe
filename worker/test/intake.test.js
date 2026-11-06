@@ -350,4 +350,65 @@ describe("participation", () => {
     expect(isValidParticipantId(PARTICIPANT_A)).toBe(true);
     expect(isValidParticipantId("not-a-uuid")).toBe(false);
   });
+
+  it("DELETE clears only the requesting participant record", async () => {
+    await SELF.fetch(
+      new Request(`https://worker.test/api/projects/${slug}/participation`, {
+        method: "POST",
+        headers: postHeaders,
+        body: JSON.stringify({
+          participantId: PARTICIPANT_A,
+          type: "decision-action",
+          action: "approved",
+          decisionId: "ship-gate-8",
+        }),
+      }),
+    );
+    await SELF.fetch(
+      new Request(`https://worker.test/api/projects/${slug}/participation`, {
+        method: "POST",
+        headers: postHeaders,
+        body: JSON.stringify({
+          participantId: PARTICIPANT_B,
+          type: "role-interest",
+          slot: "coach",
+          note: "",
+        }),
+      }),
+    );
+
+    const del = await SELF.fetch(
+      new Request(
+        `https://worker.test/api/projects/${slug}/participation?participant=${PARTICIPANT_A}`,
+        { method: "DELETE", headers: postHeaders },
+      ),
+    );
+    expect(del.status).toBe(200);
+
+    const getA = await SELF.fetch(
+      new Request(
+        `https://worker.test/api/projects/${slug}/participation?participant=${PARTICIPANT_A}`,
+        { method: "GET", headers: { Origin: ORIGIN } },
+      ),
+    );
+    expect(await getA.json()).toEqual({});
+
+    const getB = await SELF.fetch(
+      new Request(
+        `https://worker.test/api/projects/${slug}/participation?participant=${PARTICIPANT_B}`,
+        { method: "GET", headers: { Origin: ORIGIN } },
+      ),
+    );
+    expect((await getB.json()).role).toBe("coach");
+  });
+
+  it("DELETE rejects missing participant id", async () => {
+    const res = await SELF.fetch(
+      new Request(`https://worker.test/api/projects/${slug}/participation`, {
+        method: "DELETE",
+        headers: postHeaders,
+      }),
+    );
+    expect(res.status).toBe(400);
+  });
 });

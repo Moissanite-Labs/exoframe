@@ -845,6 +845,27 @@
     localStorage.setItem(localParticipationKey(slug), JSON.stringify(data));
   }
 
+  function clearLocalParticipation(slug) {
+    try {
+      localStorage.removeItem(localParticipationKey(slug));
+    } catch (_) {}
+  }
+
+  async function clearRehearsalParticipation(ctx) {
+    const { slug, apiBase } = ctx.cfg;
+    if (!slug) return;
+    if (apiBase) {
+      const participantId = ensureParticipantId();
+      if (!participantId) throw new Error("no participant id");
+      const res = await fetch(
+        `${apiBase}/api/projects/${encodeURIComponent(slug)}/participation?participant=${encodeURIComponent(participantId)}`,
+        { method: "DELETE" },
+      );
+      if (!res.ok) throw new Error("remote clear failed");
+    }
+    clearLocalParticipation(slug);
+  }
+
   function mergeParticipationClient(prev, patch) {
     const merged = { ...prev };
     if (patch.type === "role-interest") {
@@ -972,7 +993,7 @@
       const sd = $("#sigdate", ctx.root);
       if (sd) sd.textContent = `Recorded ${time()} · ${saved}`;
       if (out) {
-        out.innerHTML = `<div class="stamp">✓ Approval recorded · ${time()}</div><b>${esc(dec.approveOutcome || "No external action was sent from this page.")}</b><br><span class="mono" style="font-size:10px">${esc(saved)}</span>`;
+        out.innerHTML = `<div class="stamp">✓ Approval recorded · ${time()}</div><b>${esc(dec.approveOutcome || "No external action was sent from this page.")}</b>${dec.recordId ? `<br><span class="mono" style="font-size:10px">${esc(dec.recordId)}</span>` : ""}<br><span class="mono" style="font-size:10px">${esc(saved)}</span><br><button type="button" class="mini" id="revoke">Revoke approval</button>`;
         out.classList.add("on");
       }
     } else if (state === "declined") {
@@ -1018,7 +1039,17 @@
       motion.textContent = paused ? "Resume motion" : "Pause motion";
     });
     const reset = $("#demoReset", ctx.root);
-    if (reset) reset.addEventListener("click", () => location.reload());
+    if (reset) reset.addEventListener("click", async () => {
+      reset.disabled = true;
+      try {
+        await clearRehearsalParticipation(ctx);
+        location.reload();
+      } catch (_) {
+        reset.disabled = false;
+        const ann = $("#announce", ctx.root);
+        if (ann) ann.textContent = "Reset could not clear saved rehearsal. Try again.";
+      }
+    });
     const exp = $("#demoExport", ctx.root);
     if (exp) exp.addEventListener("click", () => {
       const data = {

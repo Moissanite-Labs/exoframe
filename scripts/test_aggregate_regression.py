@@ -134,6 +134,20 @@ class AggregateRegression(unittest.TestCase):
         self.assertIn("The crystal", html)
         self.assertIn("Imported existing project", html)
 
+    def test_crystal_reset_clears_rehearsal_storage(self) -> None:
+        src = (ROOT / "assets" / "crystal-lattice.js").read_text(encoding="utf-8")
+        self.assertIn("clearLocalParticipation", src)
+        self.assertIn("clearRehearsalParticipation", src)
+        self.assertIn('method: "DELETE"', src)
+        self.assertNotIn('reset.addEventListener("click", () => location.reload())', src)
+
+    def test_crystal_restore_includes_revoke_control(self) -> None:
+        src = (ROOT / "assets" / "crystal-lattice.js").read_text(encoding="utf-8")
+        idx = src.index("function reflectPersistedDecisionUI")
+        block = src[idx : idx + 2800]
+        self.assertIn('id="revoke"', block)
+        self.assertIn("Revoke approval", block)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

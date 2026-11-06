@@ -10,7 +10,7 @@ const MAX_IDEA_BODY = 8 * 1024;
 export function corsHeaders(request, extra = {}) {
   const origin = request.headers.get("Origin");
   const headers = {
-    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type",
     Vary: "Origin",
     ...extra,
@@ -379,6 +379,26 @@ export async function handleParticipation(request, env, slug) {
     return jsonResponse(request, 200, stored ?? {});
   }
 
+  if (request.method === "DELETE") {
+    const url = new URL(request.url);
+    const participantId =
+      url.searchParams.get("participant") || url.searchParams.get("participantId");
+    if (!isValidParticipantId(participantId)) {
+      return jsonResponse(request, 400, { error: "Valid participantId is required." });
+    }
+    const clientIp = request.headers.get("CF-Connecting-IP") || "unknown";
+    const rlDel = await applyRateLimit(env, `participation:${clientIp}`);
+    if (!rlDel.success) {
+      return jsonResponse(request, 429, { error: "Too many requests. Try again later." });
+    }
+    await env.IDEAS_KV.delete(participationKey(slug, participantId));
+    return jsonResponse(request, 200, { cleared: true });
+  }
+
+  if (request.method !== "POST") {
+    return jsonResponse(request, 405, { error: "Method not allowed." });
+  }
+
   const clientIp = request.headers.get("CF-Connecting-IP") || "unknown";
   const rl = await applyRateLimit(env, `participation:${clientIp}`);
   if (!rl.success) {
@@ -441,7 +461,7 @@ export default {
     const partMatch = url.pathname.match(/^\/api\/projects\/([^/]+)\/participation$/);
     if (partMatch) {
       const slug = decodeURIComponent(partMatch[1]);
-      if (request.method === "GET" || request.method === "POST") {
+      if (request.method === "GET" || request.method === "POST" || request.method === "DELETE") {
         return handleParticipation(request, env, slug);
       }
     }
