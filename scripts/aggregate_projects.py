@@ -32,7 +32,7 @@ ALLOWED_URL_PATH_PREFIXES = (
 LIVE_GAME_HOSTS = frozenset({"www.rift.askaconsult.com", "rift.askaconsult.com"})
 
 SYNBIOS_STUBS = frozenset({"#synbios-placeholder"})
-ACTOR_KINDS = frozenset({"human", "agent"})
+ACTOR_KINDS = frozenset({"human", "agent", "unknown"})
 ACTIVITY_LINK_PREFIXES = ("../../", "https://")
 STAGE_NAMES = ("Idea", "Shape", "Prototype", "Build", "Ship")
 STATUS_LABELS = {
@@ -235,8 +235,12 @@ def fmt_snapshot_chicago(iso: str) -> str:
 
 
 def actor_mark(actor: str) -> str:
-    kind = "Person" if actor == "human" else "Agent"
-    shape = "human" if actor == "human" else "agent"
+    if actor == "human":
+        kind, shape = "Person", "human"
+    elif actor == "agent":
+        kind, shape = "Agent", "agent"
+    else:
+        kind, shape = "Account", "unknown"
     return (
         f'<span class="act-mark {shape}" aria-hidden="true"></span>'
         f'<span class="sr">{kind}</span>'
@@ -392,6 +396,7 @@ h1{{font-weight:500;font-size:clamp(30px,6vw,42px);letter-spacing:-.03em;line-he
 .act-mark{{display:inline-block;width:10px;height:10px;flex:0 0 auto}}
 .act-mark.human{{border-radius:50%;border:1.5px solid var(--carbon);background:var(--carbon-dim)}}
 .act-mark.agent{{background:var(--silicon);transform:rotate(45deg) scale(.85)}}
+.act-mark.unknown{{border-radius:2px;border:1px solid var(--tx3);background:var(--s2)}}
 .act-link{{font-size:14px;min-height:44px;display:inline-flex;align-items:center}}
 .act-pending{{border-color:#e9f4ff55}}
 .act-pending-note{{margin:8px 0 0;font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--ice);text-transform:uppercase}}

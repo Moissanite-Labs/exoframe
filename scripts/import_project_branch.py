@@ -10,7 +10,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-ALLOWLIST = frozenset({"harbor-light"})
+ALLOWLIST = frozenset({"harbor-light", "rift-manager"})
 PROJECT_REF_RE = re.compile(r"^project/[a-z0-9][a-z0-9-]{0,62}$")
 JSON_FILES = ("manifest.json", "activity.json")
 

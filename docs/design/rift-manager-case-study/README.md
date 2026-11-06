@@ -1,6 +1,6 @@
 # Rift Manager case study evidence (PR)
 
-Screenshots captured **2026-11-05 · 7:07 PM CST** (America/Chicago) for the exoframe PoC PR.
+Screenshots re-captured **2026-11-05 · ~7:13 PM CST** (America/Chicago) after branch import + `unknown` actor fixes.
 
 | File | Subject |
 |------|---------|

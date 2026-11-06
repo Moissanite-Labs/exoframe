@@ -1,6 +1,6 @@
 # exoframe
 
-GitHub Pages host for **ExoFab’s proof-of-concept intake and project pages** — not the ExoFab product itself. This repo lets us validate the flow **idea → visible progress → built result** on static Pages before a standalone ExoFab product ships.
+**ExoFab** is a **human–agent creation hub**: people bring ideas, and people and agents build in the open together. This repo (**exoframe**) is the GitHub Pages host for ExoFab’s proof-of-concept **public intake** and **project pages** — not the ExoFab product itself. We use it to validate **idea → visible progress → built result** on static Pages before a standalone ExoFab product ships.
 
 **Live site:** [https://moissanite-labs.github.io/exoframe/](https://moissanite-labs.github.io/exoframe/)
 
@@ -25,8 +25,8 @@ GitHub Pages host for **ExoFab’s proof-of-concept intake and project pages** �
 The primary public example is **[Rift Manager](projects/rift-manager/)** — a real game maintained in [ahrazzle/rift-manager](https://github.com/ahrazzle/rift-manager), playable at [https://www.rift.askaconsult.com/](https://www.rift.askaconsult.com/).
 
 - **Honesty:** ExoFab / exoframe **did not originate** this game. We showcase a **public repo and live deployment** as the PoC “project page” shape.
-- **Activity on the project page:** Copied **manually** from public GitHub merges/tags. Each refresh is labeled with a snapshot time (America/Chicago). **Not** a live Synbios stream.
-- **Sources:** `project-sources/rift-manager/{manifest.json,activity.json}` → `scripts/aggregate_projects.py` → `projects/rift-manager/`.
+- **Activity on the project page:** Copied **manually** from public GitHub merges/tags. Each refresh is labeled with a snapshot time (America/Chicago). **Not** a live Synbios stream. Activity rows use `actor: unknown` — GitHub handles are account labels only, not human/agent attribution.
+- **Sources:** allowlisted branch **`project/rift-manager`** (`manifest.json`, `activity.json` at branch root) → import → `project-sources/rift-manager/` → `scripts/aggregate_projects.py` → `projects/rift-manager/`.
 
 ## Harbor Light (retired simulation)
 
@@ -35,6 +35,8 @@ The primary public example is **[Rift Manager](projects/rift-manager/)** — a r
 ## Source model (preserve)
 
 ```
+project/<slug> branch (JSON at branch root)
+        ↓  scripts/import_project_branch.py  (optional; manual or workflow_dispatch)
 project-sources/<slug>/{manifest.json,activity.json}
         ↓  scripts/aggregate_projects.py
 projects/<slug>/index.html + activity.json
@@ -42,12 +44,14 @@ projects/<slug>/index.html + activity.json
 GitHub Pages deploy
 ```
 
-Optional: `scripts/import_project_branch.py` copies JSON from allowlisted `project/<slug>` branches (today: **harbor-light** only).
+Import allowlist today: **`harbor-light`**, **`rift-manager`**. See [`docs/design/rift-manager-case-study/IMPORT.md`](docs/design/rift-manager-case-study/IMPORT.md) for a recorded import proof.
 
 ## Local preview
 
 ```bash
-python3 scripts/aggregate_projects.py --force   # refresh projects/ from project-sources/
+git fetch origin project/rift-manager
+python3 scripts/import_project_branch.py rift-manager
+python3 scripts/aggregate_projects.py --force
 python3 -m http.server 8000
 # http://127.0.0.1:8000/  ·  queue  ·  projects/rift-manager/
 python3 scripts/test_aggregate_regression.py

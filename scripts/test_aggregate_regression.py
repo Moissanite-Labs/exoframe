@@ -22,6 +22,18 @@ class AggregateRegression(unittest.TestCase):
         with self.assertRaises(SystemExit):
             agg.assert_safe_slug("not-allowlisted")
 
+    def test_accepts_unknown_actor(self) -> None:
+        row = [
+            {
+                "at": "2026-01-01T12:00:00Z",
+                "actor": "unknown",
+                "who": "ahrazzle",
+                "verb": "Merged PR #1",
+            }
+        ]
+        out = agg.validate_activity(row, "rift-manager")
+        self.assertEqual(out[0]["actor"], "unknown")
+
     def test_rejects_bad_activity_schema(self) -> None:
         bad = [{"at": "2026-01-01", "kind": "x", "summary": "legacy field"}]
         with self.assertRaises(SystemExit):
