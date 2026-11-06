@@ -41,30 +41,75 @@
     return normalizeConfig({});
   }
 
+  function deriveStageProgress(works, stageIndex, currentStage) {
+    if (stageIndex < currentStage) return 100;
+    if (stageIndex > currentStage) return 0;
+    const rc = ringCounts(works, stageIndex);
+    const recorded = rc.filled + rc.p + rc.forming;
+    if (recorded === 0) return 0;
+    return Math.round((rc.filled / recorded) * 100);
+  }
+
+  function flattenDecision(dec) {
+    if (!dec || typeof dec !== "object") return dec;
+    const d = { ...dec };
+    if (d.proposer && typeof d.proposer === "object") {
+      const p = d.proposer;
+      d.proposerActor = d.proposerActor || p.actor;
+      d.proposedAgo = d.proposedAgo || p.when;
+      if (p.build && !d.build) d.build = p.build;
+      d.proposer = typeof p.name === "string" && p.name.trim() ? p.name.trim() : "Unknown";
+    } else if (typeof d.proposer !== "string") {
+      d.proposer = d.proposer ? String(d.proposer) : "Unknown";
+    }
+    return d;
+  }
+
+  function normalizeTraceRows(trace) {
+    return (trace || []).map((row) => {
+      if (!row || typeof row !== "object") return row;
+      const r = { ...row };
+      if (r.fromHtml) return r;
+      if (typeof r.from === "string" && /<[a-z][\s\S]*>/i.test(r.from)) {
+        r.fromHtml = r.from;
+        r.from = r.from.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+      }
+      return r;
+    });
+  }
+
   function normalizeConfig(raw) {
-    const stages = (raw.stages && raw.stages.length === 5)
-      ? raw.stages
-      : [
-          { n: "001", name: "Idea", progress: 100 },
-          { n: "002", name: "Shape", progress: 100 },
-          { n: "003", name: "Prototype", progress: 0 },
-          { n: "004", name: "Build", progress: 0 },
-          { n: "005", name: "Ship", progress: 0 },
-        ];
+    const defaultStages = [
+      { n: "001", name: "Idea" },
+      { n: "002", name: "Shape" },
+      { n: "003", name: "Prototype" },
+      { n: "004", name: "Build" },
+      { n: "005", name: "Ship" },
+    ];
+    const stageDefs = (raw.stages && raw.stages.length === 5) ? raw.stages : defaultStages;
+    const works = Array.isArray(raw.works) ? raw.works : [];
+    const currentStage = typeof raw.currentStage === "number" ? raw.currentStage : 2;
+    const stages = stageDefs.map((st, i) => ({
+      n: st.n,
+      name: st.name,
+      progress: deriveStageProgress(works, i, currentStage),
+    }));
     const apiBase = (raw.apiBase || global.EXO_API_BASE || "").replace(/\/$/, "");
+    let decision = raw.decision === undefined ? null : raw.decision;
+    if (decision) decision = flattenDecision(decision);
     return {
       slug: raw.slug || "",
       apiBase,
       rehearsal: Object.assign({ enabled: false, label: "Rehearsal" }, raw.rehearsal || {}),
       project: raw.project || {},
       stages,
-      works: Array.isArray(raw.works) ? raw.works : [],
+      works,
       crew: raw.crew || { roles: [] },
       liveWork: Array.isArray(raw.liveWork) ? raw.liveWork : [],
-      trace: Array.isArray(raw.trace) ? raw.trace : [],
-      decision: raw.decision === undefined ? null : raw.decision,
+      trace: normalizeTraceRows(raw.trace),
+      decision,
       shipPending: Array.isArray(raw.shipPending) ? raw.shipPending : [],
-      currentStage: typeof raw.currentStage === "number" ? raw.currentStage : 2,
+      currentStage,
       participant: raw.participant || null,
     };
   }

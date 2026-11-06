@@ -33,28 +33,23 @@
   "stages": [
     {
       "n": "001",
-      "name": "Idea",
-      "progress": 100
+      "name": "Idea"
     },
     {
       "n": "002",
-      "name": "Shape",
-      "progress": 100
+      "name": "Shape"
     },
     {
       "n": "003",
-      "name": "Prototype",
-      "progress": 100
+      "name": "Prototype"
     },
     {
       "n": "004",
-      "name": "Build",
-      "progress": 100
+      "name": "Build"
     },
     {
       "n": "005",
-      "name": "Ship",
-      "progress": 72
+      "name": "Ship"
     }
   ],
   "works": [

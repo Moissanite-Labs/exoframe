@@ -27,11 +27,11 @@
     "snapshot_note": "Lattice seeded from verified public GitHub merges, tags, and live game checks through PR #39 (merged after the 6:59 PM CST import snapshot). Refresh is manual until automation lands."
   },
   "stages": [
-    { "n": "001", "name": "Idea", "progress": 100 },
-    { "n": "002", "name": "Shape", "progress": 100 },
-    { "n": "003", "name": "Prototype", "progress": 100 },
-    { "n": "004", "name": "Build", "progress": 100 },
-    { "n": "005", "name": "Ship", "progress": 72 }
+    { "n": "001", "name": "Idea" },
+    { "n": "002", "name": "Shape" },
+    { "n": "003", "name": "Prototype" },
+    { "n": "004", "name": "Build" },
+    { "n": "005", "name": "Ship" }
   ],
   "works": [
     {
