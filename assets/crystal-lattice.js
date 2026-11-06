@@ -213,9 +213,11 @@
     renderDecision(ctx, $, $$, lattice);
     renderCrew(ctx, $);
     renderLive(ctx, $, $$);
-    renderTrace(ctx, $, lattice);
+    renderTrace(ctx, $, $$, lattice);
     bindDemoTools(ctx, $, lattice);
-    loadParticipation(ctx, $, $$, lattice).then(() => applyPersistedDecision(ctx, $, $$, lattice));
+    loadParticipation(ctx, $, $$, lattice).then(() => {
+      applyPersistedDecision(ctx, $, $$, lattice);
+    });
 
     return ctx;
   }
@@ -518,9 +520,19 @@
     const time = () => new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
     const T = { sign: 1200, settle: 250, toast: 900 };
 
-    function record(action, details) {
+    async function record(action, details) {
       ctx.demoLog.push({ action, at: new Date().toISOString(), ...details });
-      postParticipation(ctx, { type: "decision-action", action, decisionId: dec.id, ...details }).catch(() => {});
+      return persistParticipation(ctx, { type: "decision-action", action, decisionId: dec.id, ...details });
+    }
+
+    function persistFailMessage(action) {
+      const labels = {
+        approved: "Approval was not saved.",
+        declined: "Decline was not saved.",
+        revoked: "Revoke was not saved.",
+        revision_requested: "Revision request was not saved.",
+      };
+      return labels[action] || "Change was not saved.";
     }
 
     function drawSignature(done) {
@@ -572,25 +584,37 @@
       bindTraceRow(li);
     }
 
-    function approve() {
+    async function approve() {
       if (ctx.busy || ctx.decisionState === "declined") return;
-      ctx.busy = true; ctx.decisionState = "approving";
+      ctx.busy = true;
       if (approveB) approveB.disabled = true;
       if (declineB) declineB.disabled = true;
       if (reviseB) reviseB.disabled = true;
       const at = $("#approveText", ctx.root);
+      if (at) at.textContent = "Saving…";
+      say(`Saving approval${ctx.remoteMode === "local" ? " (rehearsal)" : ""}…`);
+      try {
+        await record("approved");
+      } catch {
+        ctx.busy = false;
+        if (approveB) approveB.disabled = false;
+        if (declineB) declineB.disabled = false;
+        if (reviseB) reviseB.disabled = false;
+        if (at) at.textContent = "Approve";
+        say(persistFailMessage("approved"));
+        return;
+      }
+      ctx.decisionState = "approved";
       if (at) at.textContent = "Signing…";
-      say(`Simulating approval${ctx.remoteMode === "local" ? " (local rehearsal only)" : ""}.`);
       drawSignature(() => {
-        ctx.decisionState = "approved";
-        record("approved");
+        const saved = participationSavedLabel(ctx, "decision");
         if (decEl) decEl.classList.add("closed");
         const lt = $("#dlabelText", ctx.root); if (lt) lt.textContent = dec.approvedLabel || "Decision · approved";
         const ldot = $("#ldot", ctx.root); if (ldot) ldot.style.cssText = "background:var(--ok);box-shadow:0 0 8px var(--ok)";
         const pill = $("#pill", ctx.root); if (pill) { pill.textContent = dec.approvedPill || "Approved"; pill.className = "pill signed"; }
-        const sd = $("#sigdate", ctx.root); if (sd) sd.textContent = `Recorded ${time()} · ${ctx.remoteMode === "local" ? "local rehearsal" : "stored participation"}`;
+        const sd = $("#sigdate", ctx.root); if (sd) sd.textContent = `Recorded ${time()} · ${saved}`;
         if (out) {
-          out.innerHTML = `<div class="stamp">✓ Approval recorded · ${time()}</div><b>${esc(dec.approveOutcome || "No external action was sent from this page.")}</b>${dec.recordId ? `<br><span class="mono" style="font-size:10px">${esc(dec.recordId)}</span>` : ""}<br><button type="button" class="mini" id="revoke">Revoke approval</button>`;
+          out.innerHTML = `<div class="stamp">✓ Approval recorded · ${time()}</div><b>${esc(dec.approveOutcome || "No external action was sent from this page.")}</b>${dec.recordId ? `<br><span class="mono" style="font-size:10px">${esc(dec.recordId)}</span>` : ""}<br><span class="mono" style="font-size:10px">${esc(saved)}</span><br><button type="button" class="mini" id="revoke">Revoke approval</button>`;
           out.classList.add("on"); out.focus({ preventScroll: true });
         }
         const n = lat.pend;
@@ -621,33 +645,54 @@
     const cancel = $("#cancelDecline", ctx.root);
     if (cancel) cancel.addEventListener("click", () => { if (actions) actions.style.display = ""; if (dbox) dbox.classList.remove("on"); declineB && declineB.focus(); });
     const confirm = $("#confirmDecline", ctx.root);
-    if (confirm) confirm.addEventListener("click", () => {
+    if (confirm) confirm.addEventListener("click", async () => {
       if (ctx.decisionState === "declined") return;
-      ctx.decisionState = "declined";
       const why = ($("#why", ctx.root) || {}).value || "";
-      record("declined", { reason: why });
+      try {
+        await record("declined", { reason: why });
+      } catch {
+        say(persistFailMessage("declined"));
+        return;
+      }
+      ctx.decisionState = "declined";
+      const saved = participationSavedLabel(ctx, "decision");
       if (dbox) dbox.classList.remove("on");
       if (decEl) decEl.classList.add("closed");
       const lt = $("#dlabelText", ctx.root); if (lt) lt.textContent = dec.declinedLabel || "Decision · declined";
       if (out) {
-        out.innerHTML = `<div class="stamp" style="color:var(--tx2)">Declined · ${time()}</div><b>Nothing was sent.</b>${why ? `<br>Your note: “${esc(why)}”` : ""}`;
+        out.innerHTML = `<div class="stamp" style="color:var(--tx2)">Declined · ${time()}</div><b>Nothing was sent.</b>${why ? `<br>Your note: “${esc(why)}”` : ""}<br><span class="mono" style="font-size:10px">${esc(saved)}</span>`;
         out.classList.add("on"); out.focus({ preventScroll: true });
       }
       say("Declined. Nothing was sent.");
     });
-    if (reviseB) reviseB.addEventListener("click", () => {
+    if (reviseB) reviseB.addEventListener("click", async () => {
       if (ctx.busy) return;
-      record("revision_requested");
-      if (out) { out.textContent = dec.reviseOutcome || "Revision requested. The proposal stays open."; out.classList.add("on"); out.focus({ preventScroll: true }); }
+      try {
+        await record("revision_requested");
+      } catch {
+        say(persistFailMessage("revision_requested"));
+        return;
+      }
+      const saved = participationSavedLabel(ctx, "decision");
+      if (out) {
+        out.innerHTML = `${esc(dec.reviseOutcome || "Revision requested. The proposal stays open.")}<br><span class="mono" style="font-size:10px">${esc(saved)}</span>`;
+        out.classList.add("on"); out.focus({ preventScroll: true });
+      }
       say("Revision requested.");
     });
-    if (out) out.addEventListener("click", (e) => {
+    if (out) out.addEventListener("click", async (e) => {
       if (e.target.id !== "revoke" || ctx.decisionState !== "approved") return;
+      try {
+        await record("revoked");
+      } catch {
+        say(persistFailMessage("revoked"));
+        return;
+      }
       ctx.decisionState = "revoked";
-      record("revoked");
+      const saved = participationSavedLabel(ctx, "decision");
       if (sigline) sigline.classList.add("revoked");
       const pill = $("#pill", ctx.root); if (pill) { pill.textContent = "Revoked"; pill.className = "pill muted"; }
-      e.target.outerHTML = `<div class="stamp" style="color:var(--tx2);margin-top:10px">Approval revoked · ${time()}</div>`;
+      e.target.outerHTML = `<div class="stamp" style="color:var(--tx2);margin-top:10px">Approval revoked · ${time()} · ${esc(saved)}</div>`;
       say("Approval revoked.");
     });
   }
@@ -703,16 +748,22 @@
     if (form && sel && open.length) {
       form.hidden = false;
       sel.innerHTML = open.map((r) => `<option value="${esc(r.slot || r.role)}">${esc(r.role || r.slot)}</option>`).join("");
-      form.addEventListener("submit", (e) => {
+      form.addEventListener("submit", async (e) => {
         e.preventDefault();
         const slot = sel.value;
-        postParticipation(ctx, { type: "role-interest", slot, note: "" }).then(() => {
-          const st = $("[data-exo-role-status]", ctx.root);
-          if (st) { st.hidden = false; st.textContent = ctx.remoteMode === "local" ? "Interest saved locally (rehearsal)." : "Interest sent."; }
-        }).catch(() => {
-          const st = $("[data-exo-role-status]", ctx.root);
-          if (st) { st.hidden = false; st.textContent = "Interest noted locally (API unavailable)."; }
-        });
+        const st = $("[data-exo-role-status]", ctx.root);
+        try {
+          await persistParticipation(ctx, { type: "role-interest", slot, note: "" });
+          if (st) {
+            st.hidden = false;
+            st.textContent = participationSavedLabel(ctx, "interest");
+          }
+        } catch {
+          if (st) {
+            st.hidden = false;
+            st.textContent = "Interest was not saved.";
+          }
+        }
       });
     }
   }
@@ -741,7 +792,7 @@
     }));
   }
 
-  function renderTrace(ctx, $, lat) {
+  function renderTrace(ctx, $, $$, lat) {
     const rows = ctx.cfg.trace || [];
     const list = $("[data-exo-trace-list]", ctx.root);
     if (!list) return;
@@ -756,6 +807,207 @@
       ["mouseenter", "focus"].forEach((ev) => row.addEventListener(ev, on));
       ["mouseleave", "blur"].forEach((ev) => row.addEventListener(ev, () => clearHl(ctx.root)));
     });
+  }
+
+  const PARTICIPANT_STORAGE_KEY = "exoframe-participant-id";
+  const PARTICIPANT_ID_RE =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+  function ensureParticipantId() {
+    try {
+      let id = localStorage.getItem(PARTICIPANT_STORAGE_KEY);
+      if (id && PARTICIPANT_ID_RE.test(id)) return id;
+      if (!global.crypto || !crypto.randomUUID) return null;
+      id = crypto.randomUUID();
+      localStorage.setItem(PARTICIPANT_STORAGE_KEY, id);
+      return id;
+    } catch {
+      return null;
+    }
+  }
+
+  function localParticipationKey(slug) {
+    return `exoframe-participation:${slug}`;
+  }
+
+  function readLocalParticipation(slug) {
+    try {
+      const raw = localStorage.getItem(localParticipationKey(slug));
+      if (!raw) return {};
+      const data = JSON.parse(raw);
+      return data && typeof data === "object" ? data : {};
+    } catch {
+      return {};
+    }
+  }
+
+  function writeLocalParticipation(slug, data) {
+    localStorage.setItem(localParticipationKey(slug), JSON.stringify(data));
+  }
+
+  function mergeParticipationClient(prev, patch) {
+    const merged = { ...prev };
+    if (patch.type === "role-interest") {
+      merged.roleInterest = { slot: patch.slot, note: patch.note || "" };
+      merged.role = patch.slot;
+    } else if (patch.type === "decision-action") {
+      merged.decisionAction = { action: patch.action, decisionId: patch.decisionId };
+      if (patch.reason) merged.decisionAction.reason = patch.reason;
+      if (patch.action === "approved") merged.decisionState = "approved";
+      else if (patch.action === "declined") merged.decisionState = "declined";
+      else if (patch.action === "revoked") merged.decisionState = "revoked";
+      else if (patch.action === "revision_requested") merged.decisionState = "pending";
+    }
+    return merged;
+  }
+
+  function applyParticipationData(ctx, data) {
+    if (!data || typeof data !== "object") return;
+    if (data.roleInterest) ctx._roleInterest = data.roleInterest;
+    else if (data.role) ctx._roleInterest = { slot: data.role, note: "" };
+    if (data.decisionAction) ctx._persistedAction = data.decisionAction;
+    if (data.decisionState) ctx.decisionState = data.decisionState;
+  }
+
+  function participationSavedLabel(ctx, kind) {
+    if (ctx.remoteMode === "remote") {
+      return kind === "interest"
+        ? `Interest saved for this visitor${ctx._roleInterest?.slot ? `: ${ctx._roleInterest.slot}` : ""}.`
+        : "Saved for this visitor.";
+    }
+    return kind === "interest"
+      ? `Interest saved in this browser only (rehearsal)${ctx._roleInterest?.slot ? `: ${ctx._roleInterest.slot}` : ""}.`
+      : "Saved in this browser only (rehearsal).";
+  }
+
+  async function persistParticipation(ctx, patch) {
+    const { slug, apiBase } = ctx.cfg;
+    if (!slug) throw new Error("missing slug");
+    const participantId = ensureParticipantId();
+    if (!participantId) throw new Error("no participant id");
+
+    if (!apiBase) {
+      const prev = readLocalParticipation(slug);
+      const merged = mergeParticipationClient(prev, patch);
+      try {
+        writeLocalParticipation(slug, merged);
+      } catch {
+        throw new Error("local write failed");
+      }
+      ctx.remoteMode = "local";
+      applyParticipationData(ctx, merged);
+      return { mode: "local", data: merged };
+    }
+
+    const res = await fetch(`${apiBase}/api/projects/${encodeURIComponent(slug)}/participation`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...patch, participantId }),
+    });
+    if (!res.ok) throw new Error("participation failed");
+    const data = await res.json();
+    ctx.remoteMode = "remote";
+    applyParticipationData(ctx, data);
+    return { mode: "remote", data };
+  }
+
+  async function loadParticipation(ctx, $, $$, lat) {
+    const { slug, apiBase } = ctx.cfg;
+    if (!slug) return;
+    if (!apiBase) {
+      ctx.remoteMode = "local";
+      applyParticipationData(ctx, readLocalParticipation(slug));
+      showRoleInterestStatus(ctx, $);
+      return;
+    }
+    const participantId = ensureParticipantId();
+    if (!participantId) {
+      ctx.remoteMode = "local";
+      return;
+    }
+    try {
+      const res = await fetch(
+        `${apiBase}/api/projects/${encodeURIComponent(slug)}/participation?participant=${encodeURIComponent(participantId)}`,
+      );
+      if (!res.ok) throw new Error("load failed");
+      const data = await res.json();
+      ctx.remoteMode = "remote";
+      applyParticipationData(ctx, data);
+    } catch {
+      ctx.remoteMode = "local";
+      applyParticipationData(ctx, readLocalParticipation(slug));
+    }
+    showRoleInterestStatus(ctx, $);
+  }
+
+  function showRoleInterestStatus(ctx, $) {
+    const st = $("[data-exo-role-status]", ctx.root);
+    if (!st || !ctx._roleInterest) return;
+    st.hidden = false;
+    st.textContent = participationSavedLabel(ctx, "interest");
+  }
+
+  function reflectPersistedDecisionUI(ctx, $, $$, lat) {
+    const dec = ctx.cfg.decision;
+    if (!dec) return;
+    const state = ctx.decisionState;
+    const decEl = $("#decision", ctx.root);
+    const out = $("#outcome", ctx.root);
+    const sigline = $("#sigline", ctx.root);
+    const time = () => new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    const saved = participationSavedLabel(ctx, "decision");
+
+    if (state === "approved") {
+      if (sigline) sigline.classList.add("signed");
+      if (decEl) decEl.classList.add("closed");
+      const lt = $("#dlabelText", ctx.root);
+      if (lt) lt.textContent = dec.approvedLabel || "Decision · approved";
+      const ldot = $("#ldot", ctx.root);
+      if (ldot) ldot.style.cssText = "background:var(--ok);box-shadow:0 0 8px var(--ok)";
+      const pill = $("#pill", ctx.root);
+      if (pill) {
+        pill.textContent = dec.approvedPill || "Approved";
+        pill.className = "pill signed";
+      }
+      const sd = $("#sigdate", ctx.root);
+      if (sd) sd.textContent = `Recorded ${time()} · ${saved}`;
+      if (out) {
+        out.innerHTML = `<div class="stamp">✓ Approval recorded · ${time()}</div><b>${esc(dec.approveOutcome || "No external action was sent from this page.")}</b><br><span class="mono" style="font-size:10px">${esc(saved)}</span>`;
+        out.classList.add("on");
+      }
+    } else if (state === "declined") {
+      if (decEl) decEl.classList.add("closed");
+      const lt = $("#dlabelText", ctx.root);
+      if (lt) lt.textContent = dec.declinedLabel || "Decision · declined";
+      const why = ctx._persistedAction && ctx._persistedAction.reason;
+      if (out) {
+        out.innerHTML = `<div class="stamp" style="color:var(--tx2)">Declined · ${time()}</div><b>Nothing was sent.</b>${why ? `<br>Your note: “${esc(why)}”` : ""}<br><span class="mono" style="font-size:10px">${esc(saved)}</span>`;
+        out.classList.add("on");
+      }
+    } else if (state === "revoked") {
+      if (sigline) sigline.classList.add("revoked");
+      const pill = $("#pill", ctx.root);
+      if (pill) {
+        pill.textContent = "Revoked";
+        pill.className = "pill muted";
+      }
+      if (out) {
+        out.innerHTML = `<div class="stamp" style="color:var(--tx2)">Approval revoked · ${time()} · ${esc(saved)}</div>`;
+        out.classList.add("on");
+      }
+    }
+  }
+
+  function applyPersistedDecision(ctx, $, $$, lat) {
+    const act = ctx._persistedAction;
+    if (act && ctx.cfg.decision) {
+      if (act.action === "approved") ctx.decisionState = "approved";
+      else if (act.action === "declined") ctx.decisionState = "declined";
+      else if (act.action === "revoked") ctx.decisionState = "revoked";
+    }
+    if (ctx.decisionState === "approved" || ctx.decisionState === "declined" || ctx.decisionState === "revoked") {
+      reflectPersistedDecisionUI(ctx, $, $$, lat);
+    }
   }
 
   function bindDemoTools(ctx, $, lat) {
@@ -789,48 +1041,6 @@
       const target = document.getElementById("decision") || document.getElementById("exo-crystal-decision");
       if (target) { e.preventDefault(); target.scrollIntoView({ behavior: "smooth" }); target.focus({ preventScroll: true }); }
     });
-  }
-
-  async function postParticipation(ctx, body) {
-    const { slug, apiBase } = ctx.cfg;
-    if (!apiBase || !slug) {
-      ctx.remoteMode = "local";
-      return Promise.resolve({ local: true });
-    }
-    const res = await fetch(`${apiBase}/api/projects/${encodeURIComponent(slug)}/participation`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    if (!res.ok) throw new Error("participation failed");
-    ctx.remoteMode = "remote";
-    return res.json();
-  }
-
-  async function loadParticipation(ctx, $, $$, lat) {
-    const { slug, apiBase, decision } = ctx.cfg;
-    if (!apiBase || !slug || !decision) {
-      ctx.remoteMode = ctx.cfg.rehearsal.enabled ? "local" : "none";
-      return;
-    }
-    try {
-      const res = await fetch(`${apiBase}/api/projects/${encodeURIComponent(slug)}/participation`);
-      if (!res.ok) throw new Error("load failed");
-      const data = await res.json();
-      ctx.remoteMode = "remote";
-      if (data.decisionState) ctx.decisionState = data.decisionState;
-      if (data.decisionAction) ctx._persistedAction = data.decisionAction;
-    } catch (_) {
-      ctx.remoteMode = "local";
-    }
-  }
-
-  function applyPersistedDecision(ctx, $, $$, lat) {
-    const act = ctx._persistedAction;
-    if (!act || !ctx.cfg.decision) return;
-    if (act.action === "approved") ctx.decisionState = "approved";
-    if (act.action === "declined") ctx.decisionState = "declined";
-    if (act.action === "revoked") ctx.decisionState = "revoked";
   }
 
   global.ExoCrystalMount = ExoCrystalMount;

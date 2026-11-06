@@ -230,17 +230,13 @@ def render_crystal_project_page(manifest: dict, lattice: dict) -> str:
     )
     proj["links"] = links
     snap = manifest.get("snapshot_at")
-    snap_note = manifest.get("snapshot_note") or lattice.get("project", {}).get(
-        "snapshot_note", ""
-    )
+    lat_proj = lattice.get("project", {}) or {}
+    snap_note = lat_proj.get("snapshot_note") or manifest.get("snapshot_note") or ""
     notice = ""
     if manifest.get("case_study"):
-        snap_line = ""
-        if snap:
-            snap_line = f"Snapshot as of {fmt_snapshot_chicago(str(snap))} (America/Chicago). "
         notice = (
             f'<p class="notice ex-banner wrap" role="status" style="margin:0 auto;max-width:1440px;padding:12px 24px 0">'
-            f"PoC case study · external project · {esc(snap_line)}{esc(snap_note)}</p>"
+            f"PoC case study · external project · {esc(snap_note)}</p>"
         )
     footer = (
         '<span>Exoframe · Crystal Lattice project view · imported work stays attributed to its sources · '
@@ -426,14 +422,11 @@ def render_project_page(manifest: dict, activity: list) -> str:
     gap_note = ""
     if case_study:
         banner = '<p class="notice ex-banner" role="status">PoC case study · external project</p>'
-        snap_line = ""
-        if snapshot_at:
-            snap_line = f"Snapshot as of {esc(fmt_snapshot_chicago(snapshot_at))} (America/Chicago). "
         note = snapshot_note or (
             "Activity is refreshed manually from public GitHub; not a live Synbios feed."
         )
         gap_note = (
-            f'<p class="gap-note">{snap_line}{esc(note)} '
+            f'<p class="gap-note">{esc(note)} '
             "ExoFab did not originate this game — it is built and maintained in "
             f'<a href="{esc(working_repo)}">ahrazzle/rift-manager</a>. '
             "exoframe showcases the public repo and live deployment as a proof-of-concept project page.</p>"

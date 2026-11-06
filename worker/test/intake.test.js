@@ -11,6 +11,8 @@ import {
   formatIssueBody,
   ideaIdFromNumber,
   handlePostIdeas,
+  applyParticipationPatch,
+  isValidParticipantId,
 } from "../src/index.js";
 
 describe("validateIdeaBody", () => {
@@ -211,32 +213,141 @@ describe("CORS", () => {
   });
 });
 
+describe("applyParticipationPatch", () => {
+  it("maps revision_requested to pending decisionState", () => {
+    const r = applyParticipationPatch(
+      {},
+      { type: "decision-action", action: "revision_requested", decisionId: "d1" },
+    );
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.data.decisionState).toBe("pending");
+      expect(r.data.decisionAction.action).toBe("revision_requested");
+    }
+  });
+});
+
+const PARTICIPANT_A = "11111111-1111-4111-8111-111111111111";
+const PARTICIPANT_B = "22222222-2222-4222-8222-222222222222";
+const ORIGIN = "https://moissanite-labs.github.io";
+
 describe("participation", () => {
-  it("merges POST into KV", async () => {
-    const slug = "rift-manager";
+  const slug = "rift-manager";
+  const postHeaders = {
+    Origin: ORIGIN,
+    "Content-Type": "application/json",
+    "CF-Connecting-IP": "203.0.113.55",
+  };
+
+  it("rejects POST without participantId", async () => {
+    const res = await SELF.fetch(
+      new Request(`https://worker.test/api/projects/${slug}/participation`, {
+        method: "POST",
+        headers: postHeaders,
+        body: JSON.stringify({ type: "role-interest", slot: "coach" }),
+      }),
+    );
+    expect(res.status).toBe(400);
+  });
+
+  it("stores browser role-interest payload per participant", async () => {
     const post = await SELF.fetch(
       new Request(`https://worker.test/api/projects/${slug}/participation`, {
         method: "POST",
-        headers: {
-          Origin: "https://moissanite-labs.github.io",
-          "Content-Type": "application/json",
-          "CF-Connecting-IP": "203.0.113.55",
-        },
-        body: JSON.stringify({ role: "viewer", interests: ["gameplay"] }),
+        headers: postHeaders,
+        body: JSON.stringify({
+          participantId: PARTICIPANT_A,
+          type: "role-interest",
+          slot: "analytics",
+          note: "I can help with stats",
+        }),
       }),
     );
     expect(post.status).toBe(200);
     const state = await post.json();
-    expect(state.role).toBe("viewer");
+    expect(state.role).toBe("analytics");
+    expect(state.roleInterest).toEqual({
+      slot: "analytics",
+      note: "I can help with stats",
+    });
 
     const get = await SELF.fetch(
-      new Request(`https://worker.test/api/projects/${slug}/participation`, {
-        method: "GET",
-        headers: { Origin: "https://moissanite-labs.github.io" },
-      }),
+      new Request(
+        `https://worker.test/api/projects/${slug}/participation?participant=${PARTICIPANT_A}`,
+        { method: "GET", headers: { Origin: ORIGIN } },
+      ),
     );
     expect(get.status).toBe(200);
     const stored = await get.json();
-    expect(stored.interests).toEqual(["gameplay"]);
+    expect(stored.roleInterest.slot).toBe("analytics");
+    expect(stored.decisionState).toBeUndefined();
+  });
+
+  it("stores browser decision-action payload", async () => {
+    const post = await SELF.fetch(
+      new Request(`https://worker.test/api/projects/${slug}/participation`, {
+        method: "POST",
+        headers: postHeaders,
+        body: JSON.stringify({
+          participantId: PARTICIPANT_A,
+          type: "decision-action",
+          action: "approved",
+          decisionId: "ship-gate-8",
+        }),
+      }),
+    );
+    expect(post.status).toBe(200);
+    const state = await post.json();
+    expect(state.decisionState).toBe("approved");
+    expect(state.decisionAction).toMatchObject({
+      action: "approved",
+      decisionId: "ship-gate-8",
+    });
+  });
+
+  it("isolates visitors and returns empty GET without participant id", async () => {
+    await SELF.fetch(
+      new Request(`https://worker.test/api/projects/${slug}/participation`, {
+        method: "POST",
+        headers: postHeaders,
+        body: JSON.stringify({
+          participantId: PARTICIPANT_A,
+          type: "decision-action",
+          action: "approved",
+          decisionId: "ship-gate-8",
+        }),
+      }),
+    );
+
+    const getBare = await SELF.fetch(
+      new Request(`https://worker.test/api/projects/${slug}/participation`, {
+        method: "GET",
+        headers: { Origin: ORIGIN },
+      }),
+    );
+    expect(getBare.status).toBe(200);
+    expect(await getBare.json()).toEqual({});
+
+    const getB = await SELF.fetch(
+      new Request(
+        `https://worker.test/api/projects/${slug}/participation?participant=${PARTICIPANT_B}`,
+        { method: "GET", headers: { Origin: ORIGIN } },
+      ),
+    );
+    expect(await getB.json()).toEqual({});
+
+    const getA = await SELF.fetch(
+      new Request(
+        `https://worker.test/api/projects/${slug}/participation?participant=${PARTICIPANT_A}`,
+        { method: "GET", headers: { Origin: ORIGIN } },
+      ),
+    );
+    const storedA = await getA.json();
+    expect(storedA.decisionState).toBe("approved");
+  });
+
+  it("validates participant id format", () => {
+    expect(isValidParticipantId(PARTICIPANT_A)).toBe(true);
+    expect(isValidParticipantId("not-a-uuid")).toBe(false);
   });
 });

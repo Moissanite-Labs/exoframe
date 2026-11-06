@@ -292,6 +292,69 @@ export function handleGetIdeas(request) {
   });
 }
 
+export const PARTICIPANT_ID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+/** @param {unknown} id */
+export function isValidParticipantId(id) {
+  return typeof id === "string" && PARTICIPANT_ID_RE.test(id);
+}
+
+/** @param {string} slug @param {string} participantId */
+export function participationKey(slug, participantId) {
+  return `participation:${slug}:${participantId}`;
+}
+
+/**
+ * @param {Record<string, unknown>} prev
+ * @param {Record<string, unknown>} body
+ * @returns {{ ok: true, data: Record<string, unknown> } | { ok: false, error: string }}
+ */
+export function applyParticipationPatch(prev, body) {
+  const merged = { ...(prev && typeof prev === "object" && !Array.isArray(prev) ? prev : {}) };
+  const type = body.type;
+  if (type === "role-interest") {
+    if (typeof body.slot !== "string" || !body.slot.trim()) {
+      return { ok: false, error: "slot is required for role-interest." };
+    }
+    const slot = body.slot.trim();
+    merged.roleInterest = {
+      slot,
+      note: typeof body.note === "string" ? body.note : "",
+    };
+    merged.role = slot;
+    return { ok: true, data: merged };
+  }
+  if (type === "decision-action") {
+    if (typeof body.action !== "string" || !body.action.trim()) {
+      return { ok: false, error: "action is required for decision-action." };
+    }
+    const action = body.action.trim();
+    const allowed = new Set(["approved", "declined", "revoked", "revision_requested"]);
+    if (!allowed.has(action)) {
+      return { ok: false, error: "Invalid decision action." };
+    }
+    /** @type {Record<string, unknown>} */
+    const decisionAction = {
+      action,
+      decisionId: body.decisionId,
+    };
+    if (typeof body.reason === "string" && body.reason.trim()) {
+      decisionAction.reason = body.reason.trim();
+    }
+    merged.decisionAction = decisionAction;
+    if (action === "approved") merged.decisionState = "approved";
+    else if (action === "declined") merged.decisionState = "declined";
+    else if (action === "revoked") merged.decisionState = "revoked";
+    else if (action === "revision_requested") merged.decisionState = "pending";
+    return { ok: true, data: merged };
+  }
+  if (typeof type !== "string") {
+    return { ok: false, error: "type is required." };
+  }
+  return { ok: false, error: `Unknown participation type: ${type}` };
+}
+
 /**
  * @param {Request} request
  * @param {Env} env
@@ -301,10 +364,18 @@ export async function handleParticipation(request, env, slug) {
   if (!slug || !/^[a-z0-9-]+$/i.test(slug)) {
     return jsonResponse(request, 400, { error: "Invalid project slug." });
   }
-  const key = `participation:${slug}`;
 
   if (request.method === "GET") {
-    const stored = await env.IDEAS_KV.get(key, "json");
+    const url = new URL(request.url);
+    const participantId =
+      url.searchParams.get("participant") || url.searchParams.get("participantId");
+    if (!isValidParticipantId(participantId)) {
+      return jsonResponse(request, 200, {});
+    }
+    const stored = await env.IDEAS_KV.get(
+      participationKey(slug, participantId),
+      "json",
+    );
     return jsonResponse(request, 200, stored ?? {});
   }
 
@@ -314,27 +385,35 @@ export async function handleParticipation(request, env, slug) {
     return jsonResponse(request, 429, { error: "Too many requests. Try again later." });
   }
 
-  let patch;
+  let body;
   try {
-    patch = await request.json();
+    body = await request.json();
   } catch {
     return jsonResponse(request, 400, { error: "Invalid JSON." });
   }
-  if (patch == null || typeof patch !== "object" || Array.isArray(patch)) {
+  if (body == null || typeof body !== "object" || Array.isArray(body)) {
     return jsonResponse(request, 400, { error: "Body must be a JSON object." });
   }
 
-  const allowed = ["role", "interests", "feedback", "decisionState"];
-  /** @type {Record<string, unknown>} */
-  const filtered = {};
-  for (const k of allowed) {
-    if (Object.prototype.hasOwnProperty.call(patch, k)) filtered[k] = patch[k];
+  if (!isValidParticipantId(body.participantId)) {
+    return jsonResponse(request, 400, { error: "Valid participantId is required." });
   }
 
-  const prev = (await env.IDEAS_KV.get(key, "json")) ?? {};
-  const merged = { ...prev, ...filtered };
-  await env.IDEAS_KV.put(key, JSON.stringify(merged));
-  return jsonResponse(request, 200, merged);
+  const prev =
+    (await env.IDEAS_KV.get(participationKey(slug, body.participantId), "json")) ?? {};
+  const patchResult = applyParticipationPatch(
+    /** @type {Record<string, unknown>} */ (prev),
+    /** @type {Record<string, unknown>} */ (body),
+  );
+  if (!patchResult.ok) {
+    return jsonResponse(request, 400, { error: patchResult.error });
+  }
+
+  await env.IDEAS_KV.put(
+    participationKey(slug, body.participantId),
+    JSON.stringify(patchResult.data),
+  );
+  return jsonResponse(request, 200, patchResult.data);
 }
 
 export default {
